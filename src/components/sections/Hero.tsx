@@ -1028,7 +1028,7 @@ const menuGroups: { items: MenuItem[] }[] = [
   {
     items: [
       { label: 'view resume', icon: '→', category: 'link', messages: [], link: '/resume.pdf' },
-      { label: 'view source', icon: '{}', category: 'link', messages: [], link: 'https://github.com/tejpreetsingh/portfolio-website' },
+      { label: 'view source', icon: '{}', category: 'link', messages: [], link: 'https://github.com/singhtejpreet2004/portfolio-website' },
     ],
   },
   {
