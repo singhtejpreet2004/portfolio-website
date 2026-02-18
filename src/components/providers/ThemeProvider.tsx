@@ -24,11 +24,9 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const overlayRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const stored = localStorage.getItem('theme') as Theme | null;
-    if (stored) {
-      setTheme(stored);
-      document.documentElement.setAttribute('data-theme', stored);
-    }
+    // Always boot in dark mode — clear any stale light-mode preference
+    localStorage.removeItem('theme');
+    document.documentElement.removeAttribute('data-theme');
   }, []);
 
   const toggleTheme = useCallback((e?: React.MouseEvent) => {
@@ -59,7 +57,6 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       setTimeout(() => {
         setTheme(newTheme);
         document.documentElement.setAttribute('data-theme', newTheme);
-        localStorage.setItem('theme', newTheme);
         overlay.style.display = 'none';
         overlay.style.transition = 'none';
         setIsTransitioning(false);
@@ -67,7 +64,6 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     } else {
       setTheme(newTheme);
       document.documentElement.setAttribute('data-theme', newTheme);
-      localStorage.setItem('theme', newTheme);
       setIsTransitioning(false);
     }
   }, [theme, isTransitioning]);
