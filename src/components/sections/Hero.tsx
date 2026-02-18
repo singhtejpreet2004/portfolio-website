@@ -363,7 +363,7 @@ export default function Hero() {
                 onClick={(e) => e.stopPropagation()}
                 className="relative max-w-md w-full mx-4 rounded-2xl border overflow-hidden shadow-2xl"
                 style={{
-                  background: '#1A2142',
+                  background: 'var(--bg-secondary)',
                   borderColor: 'var(--border-color)',
                   boxShadow: '0 0 60px rgba(88,166,255,0.1), 0 20px 60px rgba(0,0,0,0.5)',
                 }}
@@ -558,7 +558,7 @@ export default function Hero() {
               transition={{ type: 'spring', stiffness: 400, damping: 30 }}
               className="fixed top-6 right-6 z-[100] px-5 py-3 rounded-xl font-[family-name:var(--font-jetbrains)] text-sm shadow-2xl border"
               style={{
-                background: '#1A2142',
+                background: 'var(--bg-secondary)',
                 color: toastIsProcessing ? 'var(--color-yellow)' : 'var(--color-green)',
                 borderColor: toastIsProcessing ? 'rgba(255,211,0,0.3)' : 'rgba(91,204,126,0.4)',
                 boxShadow: toastIsProcessing
@@ -1028,7 +1028,7 @@ const menuGroups: { items: MenuItem[] }[] = [
   {
     items: [
       { label: 'view resume', icon: '→', category: 'link', messages: [], link: '/resume.pdf' },
-      { label: 'view source', icon: '{}', category: 'link', messages: [], link: 'https://github.com/singhtejpreet2004/portfolio-website' },
+      { label: 'view source', icon: '{}', category: 'link', messages: [], link: 'https://github.com/tejpreetsingh/portfolio-website' },
     ],
   },
   {
@@ -1072,7 +1072,7 @@ function ContextMenu({
       exit={{ opacity: 0, scale: 0.92, y: -6 }}
       transition={{ type: 'spring', stiffness: 500, damping: 30 }}
       className="fixed z-[100] min-w-[230px] rounded-xl overflow-hidden shadow-2xl border border-[var(--border-color)]"
-      style={{ left: x, top: y, background: '#1A2142', transformOrigin: 'top left' }}
+      style={{ left: x, top: y, background: 'var(--bg-secondary)', transformOrigin: 'top left' }}
     >
       <div className="px-3 py-2 text-[9px] font-[family-name:var(--font-jetbrains)] text-[var(--text-secondary)] border-b border-[var(--border-color)] flex items-center gap-2">
         <span className="text-[var(--color-green)]">●</span>
@@ -1118,7 +1118,7 @@ function ContextMenu({
 // ─────────────────────────────────────────────────────────
 
 const HIRE_INPUT_BASE =
-  'w-full bg-[#10162F] border border-[rgba(255,255,255,0.08)] rounded-lg px-3 py-2 text-[11px] font-[family-name:var(--font-jetbrains)] text-white placeholder-[rgba(255,255,255,0.35)] outline-none focus:border-[var(--color-cyan)] focus:shadow-[0_0_0_2px_rgba(88,166,255,0.15)] transition-all duration-200';
+  'w-full bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-lg px-3 py-2 text-[11px] font-[family-name:var(--font-jetbrains)] text-[var(--text-primary)] placeholder-[var(--text-secondary)] outline-none focus:border-[var(--color-cyan)] focus:shadow-[0_0_0_2px_rgba(88,166,255,0.15)] transition-all duration-200';
 
 function HireModalShell({
   filename, onClose, children,
@@ -1141,7 +1141,7 @@ function HireModalShell({
         onClick={(e) => e.stopPropagation()}
         className="relative w-full max-w-md mx-4 rounded-2xl border overflow-hidden"
         style={{
-          background: '#1A2142',
+          background: 'var(--bg-secondary)',
           borderColor: 'var(--border-color)',
           boxShadow: '0 0 60px rgba(88,166,255,0.08), 0 24px 64px rgba(0,0,0,0.5)',
         }}
@@ -1489,7 +1489,7 @@ function DataDashboard({ overdrive, onToast }: { overdrive: boolean; onToast: (m
         >
           <motion.div
             className="text-[8px] font-[family-name:var(--font-jetbrains)] px-1.5 py-0.5 rounded border border-[var(--border-color)] select-none"
-            style={{ background: '#1A2142', color: 'var(--text-secondary)' }}
+            style={{ background: 'var(--bg-secondary)', color: 'var(--text-secondary)' }}
             animate={{ opacity: cornerHovered ? 0.9 : 0.3, scale: cornerHovered ? 1.05 : 1 }}
             transition={{ duration: 0.2 }}
           >
@@ -1541,7 +1541,7 @@ function PipelineDashboardCard({ overdrive, onToast }: { overdrive: boolean; onT
     <div
       className="rounded-2xl border overflow-hidden shadow-2xl"
       style={{
-        background: '#1A2142',
+        background: 'var(--bg-secondary)',
         borderColor: overdrive ? 'var(--color-yellow)' : 'var(--border-color)',
         boxShadow: overdrive ? '0 0 60px rgba(255,211,0,0.3), 0 20px 60px rgba(0,0,0,0.4)' : '0 20px 60px rgba(0,0,0,0.3), 0 0 40px rgba(88,166,255,0.05)',
       }}
@@ -1571,7 +1571,7 @@ function PipelineDashboardCard({ overdrive, onToast }: { overdrive: boolean; onT
         <MetricCard label="Uptime" value={99.97} suffix="%" color="var(--color-yellow)" overdrive={overdrive} />
       </div>
       <div className="grid grid-cols-5 gap-px" style={{ background: 'var(--border-color)' }}>
-        <div className="col-span-3 p-4 cursor-pointer" style={{ background: '#1A2142' }} onClick={() => setChartPaused((p) => !p)}>
+        <div className="col-span-3 p-4 cursor-pointer" style={{ background: 'var(--bg-secondary)' }} onClick={() => setChartPaused((p) => !p)}>
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
               <span className="text-[10px] font-[family-name:var(--font-jetbrains)] text-[var(--text-secondary)] uppercase tracking-wider">Throughput</span>
@@ -1584,7 +1584,7 @@ function PipelineDashboardCard({ overdrive, onToast }: { overdrive: boolean; onT
           </div>
           <LiveChart overdrive={overdrive} paused={chartPaused} />
         </div>
-        <div className="col-span-2 p-4" style={{ background: '#1A2142' }}>
+        <div className="col-span-2 p-4" style={{ background: 'var(--bg-secondary)' }}>
           <div className="flex items-center justify-between mb-3">
             <span className="text-[10px] font-[family-name:var(--font-jetbrains)] text-[var(--text-secondary)] uppercase tracking-wider">Pipeline Status</span>
             <span className="text-[8px] font-[family-name:var(--font-jetbrains)] text-[var(--text-secondary)] opacity-50">click to toggle</span>
@@ -1602,7 +1602,7 @@ function PipelineDashboardCard({ overdrive, onToast }: { overdrive: boolean; onT
           </div>
         </div>
       </div>
-      <div className="border-t" style={{ borderColor: 'var(--border-color)', background: '#10162F' }}>
+      <div className="border-t" style={{ borderColor: 'var(--border-color)', background: 'var(--bg-primary)' }}>
         <div className="px-4 py-3"><TerminalOutput overdrive={overdrive} /></div>
         <div className="flex items-center gap-2 px-4 pb-3">
           <DashboardActionButton label="Run DAG" icon="▶" color="var(--color-green)" message="DAG pipeline_daily triggered" onToast={onToast} />
@@ -1665,7 +1665,7 @@ function VideoPipelineDashboard({ overdrive, onToast }: { overdrive: boolean; on
     <div
       className="rounded-2xl border overflow-hidden shadow-2xl"
       style={{
-        background: '#1A2142',
+        background: 'var(--bg-secondary)',
         borderColor: overdrive ? 'var(--color-yellow)' : 'var(--border-color)',
         boxShadow: overdrive ? '0 0 60px rgba(255,211,0,0.3), 0 20px 60px rgba(0,0,0,0.4)' : '0 20px 60px rgba(0,0,0,0.3), 0 0 40px rgba(91,204,126,0.05)',
       }}
@@ -1693,18 +1693,18 @@ function VideoPipelineDashboard({ overdrive, onToast }: { overdrive: boolean; on
 
       {/* Metrics row */}
       <div className="grid grid-cols-3 gap-px" style={{ background: 'var(--border-color)' }}>
-        <div className="p-4" style={{ background: '#1A2142' }}>
+        <div className="p-4" style={{ background: 'var(--bg-secondary)' }}>
           <span className="text-[9px] font-[family-name:var(--font-jetbrains)] text-[var(--text-secondary)] uppercase tracking-wider block">FPS</span>
           <motion.div className="text-2xl font-bold font-[family-name:var(--font-display)] mt-1" style={{ color: overdrive ? 'var(--color-yellow)' : 'var(--color-green)' }}
             animate={{ opacity: [0.7, 1] }} transition={{ duration: 0.3 }}>
             {fps}<span className="text-sm ml-0.5 opacity-60">fps</span>
           </motion.div>
         </div>
-        <div className="p-4" style={{ background: '#1A2142' }}>
+        <div className="p-4" style={{ background: 'var(--bg-secondary)' }}>
           <span className="text-[9px] font-[family-name:var(--font-jetbrains)] text-[var(--text-secondary)] uppercase tracking-wider block">Infer Latency</span>
           <div className="text-2xl font-bold font-[family-name:var(--font-display)] mt-1" style={{ color: overdrive ? 'var(--color-yellow)' : 'var(--color-cyan)' }}>18<span className="text-sm ml-0.5 opacity-60">ms</span></div>
         </div>
-        <div className="p-4" style={{ background: '#1A2142' }}>
+        <div className="p-4" style={{ background: 'var(--bg-secondary)' }}>
           <span className="text-[9px] font-[family-name:var(--font-jetbrains)] text-[var(--text-secondary)] uppercase tracking-wider block">Drop Rate</span>
           <div className="text-2xl font-bold font-[family-name:var(--font-display)] mt-1" style={{ color: overdrive ? 'var(--color-yellow)' : 'var(--color-yellow)' }}>0.3<span className="text-sm ml-0.5 opacity-60">%</span></div>
         </div>
@@ -1712,7 +1712,7 @@ function VideoPipelineDashboard({ overdrive, onToast }: { overdrive: boolean; on
 
       {/* Chart + status */}
       <div className="grid grid-cols-5 gap-px" style={{ background: 'var(--border-color)' }}>
-        <div className="col-span-3 p-4 cursor-pointer" style={{ background: '#1A2142' }} onClick={() => setChartPaused((p) => !p)}>
+        <div className="col-span-3 p-4 cursor-pointer" style={{ background: 'var(--bg-secondary)' }} onClick={() => setChartPaused((p) => !p)}>
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
               <span className="text-[10px] font-[family-name:var(--font-jetbrains)] text-[var(--text-secondary)] uppercase tracking-wider">Frame Buffer</span>
@@ -1731,7 +1731,7 @@ function VideoPipelineDashboard({ overdrive, onToast }: { overdrive: boolean; on
             />
           </div>
         </div>
-        <div className="col-span-2 p-4" style={{ background: '#1A2142' }}>
+        <div className="col-span-2 p-4" style={{ background: 'var(--bg-secondary)' }}>
           <div className="flex items-center justify-between mb-3">
             <span className="text-[10px] font-[family-name:var(--font-jetbrains)] text-[var(--text-secondary)] uppercase tracking-wider">Stage Status</span>
             <span className="text-[8px] font-[family-name:var(--font-jetbrains)] text-[var(--text-secondary)] opacity-50">click to toggle</span>
@@ -1751,7 +1751,7 @@ function VideoPipelineDashboard({ overdrive, onToast }: { overdrive: boolean; on
       </div>
 
       {/* Terminal + buttons */}
-      <div className="border-t" style={{ borderColor: 'var(--border-color)', background: '#10162F' }}>
+      <div className="border-t" style={{ borderColor: 'var(--border-color)', background: 'var(--bg-primary)' }}>
         <div className="px-4 py-3"><VideoTerminalOutput overdrive={overdrive} /></div>
         <div className="flex items-center gap-2 px-4 pb-3">
           <DashboardActionButton label="Boost FPS" icon="⚡" color="var(--color-yellow)" message="FPS target increased: 30 → 60" onToast={onToast} />
@@ -1943,7 +1943,7 @@ function MetricCard({
       : (displayed + Math.floor(fluctuation / 10)).toString();
 
   return (
-    <div className="p-4" style={{ background: '#1A2142' }}>
+    <div className="p-4" style={{ background: 'var(--bg-secondary)' }}>
       <span className="text-[9px] font-[family-name:var(--font-jetbrains)] text-[var(--text-secondary)] uppercase tracking-wider">
         {label}
       </span>

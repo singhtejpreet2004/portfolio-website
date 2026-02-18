@@ -6,9 +6,9 @@
 
 :root {
   /* Primary Backgrounds */
-  --color-navy-deep: #10162F;
-  --color-navy-medium: #1A2142;
-  --color-navy-light: #252D4A;
+  --color-navy-deep: #0C1120;
+  --color-navy-medium: #131C34;
+  --color-navy-light: #1C2640;
 
   /* Accent Colors */
   --color-yellow: #FFD300;
@@ -36,7 +36,7 @@
   --shadow-glow-cyan: 0 0 20px rgba(88, 166, 255, 0.3);
 
   /* Gradients */
-  --gradient-hero: linear-gradient(135deg, #10162F 0%, #1A1040 50%, #10162F 100%);
+  --gradient-hero: linear-gradient(135deg, #0C1120 0%, #110C30 50%, #0C1120 100%);
   --gradient-card: linear-gradient(145deg, #1A2142 0%, #252D4A 100%);
   --gradient-cta: linear-gradient(90deg, #FFD300 0%, #FFA500 100%);
 
