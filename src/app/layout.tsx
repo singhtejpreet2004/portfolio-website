@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, JetBrains_Mono, Space_Grotesk } from "next/font/google";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
+import LoadingScreen from "@/components/ui/LoadingScreen";
 import "./globals.css";
 
 const inter = Inter({
@@ -52,7 +53,10 @@ export default function RootLayout({
       <body
         className={`${inter.variable} ${jetbrainsMono.variable} ${spaceGrotesk.variable} antialiased`}
       >
-        <ThemeProvider>{children}</ThemeProvider>
+        <ThemeProvider>
+          <LoadingScreen />
+          {children}
+        </ThemeProvider>
       </body>
     </html>
   );
