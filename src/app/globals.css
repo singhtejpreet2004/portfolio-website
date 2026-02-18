@@ -13,7 +13,7 @@
   /* Accent Colors */
   --color-yellow: #FFD300;
   --color-purple: #3A10E5;
-  --color-cyan: #66C4FF;
+  --color-cyan: #58a6ff;
   --color-green: #5BCC7E;
 
   /* Pastel Surfaces */
@@ -33,7 +33,7 @@
   --shadow-elevated: 0 8px 40px rgba(0, 0, 0, 0.3);
   --shadow-glow-yellow: 0 0 20px rgba(255, 211, 0, 0.3);
   --shadow-glow-purple: 0 0 20px rgba(58, 16, 229, 0.4);
-  --shadow-glow-cyan: 0 0 20px rgba(102, 196, 255, 0.3);
+  --shadow-glow-cyan: 0 0 20px rgba(88, 166, 255, 0.3);
 
   /* Gradients */
   --gradient-hero: linear-gradient(135deg, #10162F 0%, #1A1040 50%, #10162F 100%);
@@ -42,6 +42,7 @@
 
   /* Theme-specific */
   --bg-primary: var(--color-navy-deep);
+  --bg-secondary: var(--color-navy-medium);
   --bg-card: var(--color-navy-medium);
   --bg-hover: var(--color-navy-light);
   --text-primary: var(--color-text-primary);
@@ -51,6 +52,7 @@
 
 [data-theme="light"] {
   --bg-primary: #FAFAF8;
+  --bg-secondary: #FFFFFF;
   --bg-card: #FFFFFF;
   --bg-hover: #F0EDE8;
   --text-primary: #10162F;
@@ -219,6 +221,35 @@ body {
 
 .glow-purple {
   box-shadow: var(--shadow-glow-purple);
+}
+
+/* ============================================
+   EASTER EGG ANIMATIONS
+   ============================================ */
+
+/* Triple-click name → cycling color schemes */
+@keyframes color-cycle-text {
+  0% { -webkit-text-fill-color: #FFD300; }
+  16% { -webkit-text-fill-color: #FF6B6B; }
+  33% { -webkit-text-fill-color: #E8E0FF; }
+  50% { -webkit-text-fill-color: #66C4FF; }
+  66% { -webkit-text-fill-color: #5BCC7E; }
+  83% { -webkit-text-fill-color: #3A10E5; }
+  100% { -webkit-text-fill-color: #FFD300; }
+}
+
+.animate-color-cycle {
+  animation: color-cycle-text 0.6s linear infinite !important;
+}
+
+/* Overdrive mode — everything pulses */
+.overdrive-mode {
+  animation: overdrive-pulse 0.3s ease-in-out infinite alternate;
+}
+
+@keyframes overdrive-pulse {
+  from { filter: brightness(1) contrast(1); }
+  to { filter: brightness(1.1) contrast(1.05); }
 }
 
 /* ============================================
