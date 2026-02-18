@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, Sun, Moon, MessageCircle, Download } from 'lucide-react';
+import { Menu, X, Sun, Moon, Download } from 'lucide-react';
 import { useTheme } from '@/components/providers/ThemeProvider';
 
 const navItems = [
@@ -25,7 +25,6 @@ export default function Navigation() {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 100);
 
-      // Track active section
       const sections = navItems.map((item) => item.href.replace('#', ''));
       for (let i = sections.length - 1; i >= 0; i--) {
         const el = document.getElementById(sections[i]);
@@ -55,14 +54,6 @@ export default function Navigation() {
         className="fixed top-4 left-1/2 -translate-x-1/2 z-50 glass rounded-full px-2 py-2 shadow-lg"
       >
         <div className="flex items-center gap-1">
-          {/* Logo */}
-          <a
-            href="#"
-            className="flex items-center justify-center w-9 h-9 rounded-full bg-[var(--color-yellow)] text-[var(--color-text-dark)] font-[family-name:var(--font-display)] font-bold text-sm mr-2"
-          >
-            TS
-          </a>
-
           {/* Desktop Nav Items */}
           <div className="hidden md:flex items-center gap-1">
             {navItems.map((item) => (
@@ -103,6 +94,22 @@ export default function Navigation() {
             >
               <Download size={14} />
               Resume
+            </a>
+
+            {/* Avatar — Placeholder for cartoonic avatar */}
+            <a
+              href="#"
+              className="flex items-center justify-center w-9 h-9 rounded-full overflow-hidden border-2 border-[var(--color-yellow)]/50 hover:border-[var(--color-yellow)] transition-all ml-1"
+            >
+              {/* Placeholder: cartoon avatar silhouette */}
+              <div className="w-full h-full bg-gradient-to-br from-[var(--color-yellow)]/20 to-[var(--color-purple)]/20 flex items-center justify-center">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" className="text-[var(--color-yellow)]">
+                  <circle cx="12" cy="8" r="4" fill="currentColor" opacity="0.8" />
+                  <path d="M4 20c0-4.4 3.6-8 8-8s8 3.6 8 8" fill="currentColor" opacity="0.5" />
+                  {/* Tiny headphones detail for fun */}
+                  <path d="M6 8a6 6 0 0 1 12 0" stroke="currentColor" strokeWidth="1.5" fill="none" opacity="0.4" />
+                </svg>
+              </div>
             </a>
 
             {/* Mobile menu button */}
