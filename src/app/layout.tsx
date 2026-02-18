@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Inter, JetBrains_Mono, Space_Grotesk } from "next/font/google";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
 import LoadingScreen from "@/components/ui/LoadingScreen";
+import GlobalContextMenu from "@/components/ui/GlobalContextMenu";
+import CustomCursor from "@/components/ui/CustomCursor";
 import "./globals.css";
 
 const inter = Inter({
@@ -54,6 +56,8 @@ export default function RootLayout({
         className={`${inter.variable} ${jetbrainsMono.variable} ${spaceGrotesk.variable} antialiased`}
       >
         <ThemeProvider>
+          <CustomCursor />
+          <GlobalContextMenu />
           <LoadingScreen />
           {children}
         </ThemeProvider>

@@ -112,6 +112,13 @@ body {
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
+/* Hide native cursor on pointer devices — custom cursor takes over */
+@media (pointer: fine) {
+  * {
+    cursor: none !important;
+  }
+}
+
 /* ============================================
    CUSTOM SCROLLBAR
    ============================================ */
