@@ -1,3 +1,5 @@
+'use client';
+
 import Navigation from '@/components/layout/Navigation';
 import Hero from '@/components/sections/Hero';
 import About from '@/components/sections/About';
@@ -9,26 +11,32 @@ import Achievements from '@/components/sections/Achievements';
 import Contact from '@/components/sections/Contact';
 import Footer from '@/components/layout/Footer';
 import PipelineSpine from '@/components/layout/PipelineSpine';
+import { MouseContext } from '@/contexts/MouseContext';
+import { useMouseParallax } from '@/hooks/useMouseParallax';
 
 export default function Home() {
+  const { springX, springY } = useMouseParallax();
+
   return (
-    <main className="relative">
-      <Navigation />
-      <PipelineSpine />
+    <MouseContext.Provider value={{ springX, springY }}>
+      <main className="relative">
+        <Navigation />
+        <PipelineSpine />
 
-      <Hero />
+        <Hero />
 
-      <div className="relative">
-        <About />
-        <Skills />
-        <Experience />
-        <Projects />
-        <Education />
-        <Achievements />
-        <Contact />
-      </div>
+        <div className="relative">
+          <About />
+          <Skills />
+          <Experience />
+          <Projects />
+          <Education />
+          <Achievements />
+          <Contact />
+        </div>
 
-      <Footer />
-    </main>
+        <Footer />
+      </main>
+    </MouseContext.Provider>
   );
 }

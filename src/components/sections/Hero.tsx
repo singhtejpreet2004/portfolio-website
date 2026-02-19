@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useScroll, useTransform, useMotionTemplate } from 'framer-motion';
 import { ArrowDown } from 'lucide-react';
 import { profile } from '@/data/profile';
 
@@ -22,6 +22,27 @@ export default function Hero() {
   const [colorCycle, setColorCycle] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [showEasterEggGuide, setShowEasterEggGuide] = useState(false);
+
+  // ── SCROLL-DRIVEN EXIT ANIMATION ──────────────────────
+  // Uses the section ref (already attached below) to drive
+  // hero exit transforms as user scrolls away.
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ['start start', 'end start'],
+  });
+
+  // Dashboard: zooms up and fades as you scroll
+  const dashboardScale = useTransform(scrollYProgress, [0, 0.6], [1, 1.28]);
+  const dashboardOpacity = useTransform(scrollYProgress, [0.25, 0.65], [1, 0]);
+  const dashboardY = useTransform(scrollYProgress, [0, 0.6], [0, -44]);
+
+  // Left text: drifts left and fades
+  const textX = useTransform(scrollYProgress, [0, 0.5], [0, -60]);
+  const textOpacity = useTransform(scrollYProgress, [0, 0.4], [1, 0]);
+
+  // Canvas: blurs as you scroll away
+  const canvasBlur = useTransform(scrollYProgress, [0, 0.5], [0, 8]);
+  const canvasBlurFilter = useMotionTemplate`blur(${canvasBlur}px)`;
 
   // Track mouse position for interactive grid
   const handleMouseMove = useCallback((e: React.MouseEvent) => {
@@ -197,16 +218,24 @@ export default function Hero() {
         } ${colorCycle ? 'color-cycle' : ''}`}
         style={{ background: 'var(--gradient-hero)' }}
       >
-        {/* Interactive Dot Grid Background */}
-        <InteractiveDotGrid mouseX={mousePos.x} mouseY={mousePos.y} overdrive={overdriveMode} />
+        {/* Interactive Dot Grid Background — wrapped for scroll-blur filter */}
+        <motion.div
+          className="absolute inset-0 pointer-events-none"
+          style={{ filter: canvasBlurFilter, zIndex: 1, willChange: 'filter' }}
+        >
+          <InteractiveDotGrid mouseX={mousePos.x} mouseY={mousePos.y} overdrive={overdriveMode} />
+        </motion.div>
 
         {/* Floating Code Keywords */}
         <FloatingCodeElements overdrive={overdriveMode} />
 
         <div className="relative z-10 max-w-7xl mx-auto px-6 py-20 w-full">
           <div className="grid lg:grid-cols-5 gap-8 items-center">
-            {/* Left - Text Content (2 cols) */}
-            <div className="lg:col-span-2">
+            {/* Left - Text Content (2 cols) — scroll-driven exit */}
+            <motion.div
+              className="lg:col-span-2"
+              style={{ x: textX, opacity: textOpacity, willChange: 'transform, opacity' }}
+            >
               {/* Terminal pre-heading */}
               <motion.div
                 initial={{ opacity: 0 }}
@@ -290,16 +319,23 @@ export default function Hero() {
                   Get in Touch
                 </a>
               </motion.div>
-            </div>
+            </motion.div>
 
             {/* Right - Animated Dashboard (3 cols) */}
+            {/* Outer: scroll-driven exit (scale up + fade + drift up) */}
             <motion.div
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.6, duration: 0.8 }}
               className="hidden lg:flex lg:col-span-3 items-center justify-center"
+              style={{ scale: dashboardScale, opacity: dashboardOpacity, y: dashboardY, willChange: 'transform, opacity' }}
             >
-              <DataDashboard overdrive={overdriveMode} onToast={(msg) => { setToastMessage(msg); setTimeout(() => setToastMessage(null), 3000); }} />
+              {/* Inner: entrance animation */}
+              <motion.div
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.6, duration: 0.8 }}
+                className="w-full"
+              >
+                <DataDashboard overdrive={overdriveMode} onToast={(msg) => { setToastMessage(msg); setTimeout(() => setToastMessage(null), 3000); }} />
+              </motion.div>
             </motion.div>
           </div>
         </div>
@@ -362,7 +398,7 @@ export default function Hero() {
                 </div>
 
                 {/* Content */}
-                <div className="p-5 space-y-4 max-h-[70vh] overflow-y-auto">
+                <div className="p-5 space-y-4 max-h-[70vh] overflow-y-auto" data-lenis-prevent>
                   <div>
                     <p className="text-[11px] font-[family-name:var(--font-jetbrains)] text-[var(--text-secondary)] mb-3">
                       <span className="text-[var(--color-green)]">$</span> cat ~/.easter-eggs
@@ -789,7 +825,6 @@ function InteractiveDotGrid({
     <canvas
       ref={canvasRef}
       className="absolute inset-0 w-full h-full pointer-events-none"
-      style={{ zIndex: 1 }}
     />
   );
 }
@@ -1324,7 +1359,12 @@ function VideoPipelineDashboard({ overdrive, onToast }: { overdrive: boolean; on
 
 // Bar chart for video pipeline
 function BarChart({ paused, overdrive }: { paused: boolean; overdrive: boolean }) {
-  const [bars, setBars] = useState<number[]>(() => Array.from({ length: 18 }, () => 30 + Math.random() * 60));
+  const [bars, setBars] = useState<number[]>([]);
+
+  useEffect(() => {
+    // Seed initial bars on client only — avoids SSR/client hydration mismatch
+    setBars(Array.from({ length: 18 }, () => 30 + Math.random() * 60));
+  }, []);
 
   useEffect(() => {
     if (paused) return;

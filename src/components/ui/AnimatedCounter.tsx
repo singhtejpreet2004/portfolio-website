@@ -8,6 +8,7 @@ interface AnimatedCounterProps {
   duration?: number;
   suffix?: string;
   prefix?: string;
+  delay?: number;
 }
 
 export default function AnimatedCounter({
@@ -15,6 +16,7 @@ export default function AnimatedCounter({
   duration = 2,
   suffix = '',
   prefix = '',
+  delay = 0,
 }: AnimatedCounterProps) {
   const [count, setCount] = useState(0);
   const ref = useRef(null);
@@ -24,22 +26,25 @@ export default function AnimatedCounter({
   useEffect(() => {
     if (isInView && !hasAnimated.current) {
       hasAnimated.current = true;
-      const startTime = performance.now();
-      const animate = (currentTime: number) => {
-        const elapsed = (currentTime - startTime) / 1000;
-        const progress = Math.min(elapsed / duration, 1);
-        // Ease out cubic
-        const eased = 1 - Math.pow(1 - progress, 3);
-        setCount(Math.floor(eased * target));
-        if (progress < 1) {
-          requestAnimationFrame(animate);
-        } else {
-          setCount(target);
-        }
-      };
-      requestAnimationFrame(animate);
+      const timer = setTimeout(() => {
+        const startTime = performance.now();
+        const animate = (currentTime: number) => {
+          const elapsed = (currentTime - startTime) / 1000;
+          const progress = Math.min(elapsed / duration, 1);
+          // Ease out cubic
+          const eased = 1 - Math.pow(1 - progress, 3);
+          setCount(Math.floor(eased * target));
+          if (progress < 1) {
+            requestAnimationFrame(animate);
+          } else {
+            setCount(target);
+          }
+        };
+        requestAnimationFrame(animate);
+      }, delay * 1000);
+      return () => clearTimeout(timer);
     }
-  }, [isInView, target, duration]);
+  }, [isInView, target, duration, delay]);
 
   return (
     <span ref={ref} className="tabular-nums">

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, JetBrains_Mono, Space_Grotesk } from "next/font/google";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
+import { LenisProvider } from "@/components/providers/LenisProvider";
 import LoadingScreen from "@/components/ui/LoadingScreen";
 import GlobalContextMenu from "@/components/ui/GlobalContextMenu";
 import CustomCursor from "@/components/ui/CustomCursor";
@@ -55,12 +56,14 @@ export default function RootLayout({
       <body
         className={`${inter.variable} ${jetbrainsMono.variable} ${spaceGrotesk.variable} antialiased`}
       >
-        <ThemeProvider>
-          <CustomCursor />
-          <GlobalContextMenu />
-          <LoadingScreen />
-          {children}
-        </ThemeProvider>
+        <LenisProvider>
+          <ThemeProvider>
+            <CustomCursor />
+            <GlobalContextMenu />
+            <LoadingScreen />
+            {children}
+          </ThemeProvider>
+        </LenisProvider>
       </body>
     </html>
   );

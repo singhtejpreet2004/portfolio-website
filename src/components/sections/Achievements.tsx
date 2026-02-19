@@ -39,10 +39,10 @@ export default function Achievements() {
             {certifications.map((cert, i) => (
               <motion.div
                 key={cert.title}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
+                initial={{ opacity: 0, scale: 0, rotate: i % 2 === 0 ? -15 : 15, y: 20 }}
+                whileInView={{ opacity: 1, scale: 1, rotate: 0, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ delay: i * 0.1 }}
+                transition={{ delay: i * 0.08, duration: 0.5, type: 'spring', stiffness: 400, damping: 20 }}
                 whileHover={{ y: -4, scale: 1.02 }}
                 className="p-5 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] hover:border-opacity-50 transition-all duration-300 group cursor-default"
                 style={{ borderLeftWidth: '3px', borderLeftColor: cert.badgeColor }}
@@ -88,10 +88,10 @@ export default function Achievements() {
             {awards.map((award, i) => (
               <motion.div
                 key={award.title}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
+                initial={{ opacity: 0, scale: 0, rotate: i % 3 === 0 ? -20 : i % 3 === 1 ? 0 : 20, y: 20 }}
+                whileInView={{ opacity: 1, scale: 1, rotate: 0, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ delay: i * 0.1 }}
+                transition={{ delay: i * 0.1, duration: 0.5, type: 'spring', stiffness: 350, damping: 22 }}
                 whileHover={{ y: -4 }}
                 className="p-5 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] hover:border-[var(--color-yellow)]/20 transition-all duration-300 group cursor-default"
               >
@@ -127,10 +127,10 @@ export default function Achievements() {
             {accomplishments.map((acc, i) => (
               <motion.div
                 key={acc.title}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
+                initial={{ opacity: 0, scale: 0.5, y: 30 }}
+                whileInView={{ opacity: 1, scale: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ delay: i * 0.1 }}
+                transition={{ delay: i * 0.12, duration: 0.6, type: 'spring', stiffness: 300, damping: 22 }}
                 whileHover={{ y: -2 }}
                 className="p-5 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] hover:border-[var(--color-green)]/20 transition-all duration-300 cursor-default"
               >

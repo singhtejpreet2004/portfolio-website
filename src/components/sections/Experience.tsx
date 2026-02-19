@@ -59,23 +59,31 @@ function TimelineItem({
 
   return (
     <div className={`relative flex items-start ${isLeft ? 'md:flex-row' : 'md:flex-row-reverse'}`}>
-      {/* Timeline Node */}
+      {/* Timeline Node — with pulsing glow ring */}
       <motion.div
         className="absolute left-0 md:left-1/2 -translate-x-1/2 z-10"
-        initial={{ scale: 0 }}
-        whileInView={{ scale: 1 }}
+        initial={{ scale: 0, opacity: 0 }}
+        whileInView={{ scale: 1, opacity: 1 }}
         viewport={{ once: true }}
-        transition={{ delay: 0.3, type: 'spring' }}
+        transition={{ delay: 0.3, type: 'spring', stiffness: 400 }}
       >
-        <div className="w-4 h-4 rounded-full border-[3px] border-[var(--color-cyan)] bg-[var(--bg-primary)] shadow-[0_0_12px_rgba(102,196,255,0.4)]" />
+        <div className="relative">
+          <div className="w-4 h-4 rounded-full border-[3px] border-[var(--color-cyan)] bg-[var(--bg-primary)]" />
+          <motion.div
+            className="absolute inset-0 rounded-full bg-[var(--color-cyan)]"
+            animate={{ scale: [1, 2.5, 1], opacity: [0.6, 0, 0.6] }}
+            transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+          />
+        </div>
       </motion.div>
 
       {/* Card */}
       <motion.div
-        initial={{ opacity: 0, x: isLeft ? -50 : 50 }}
-        whileInView={{ opacity: 1, x: 0 }}
-        viewport={{ once: true, margin: '-50px' }}
-        transition={{ duration: 0.6, delay: 0.1 }}
+        initial={{ opacity: 0, x: isLeft ? -100 : 100, rotateY: isLeft ? 12 : -12 }}
+        whileInView={{ opacity: 1, x: 0, rotateY: 0 }}
+        viewport={{ once: true, margin: '-80px' }}
+        transition={{ duration: 0.8, delay: 0.1, type: 'spring', stiffness: 120, damping: 18 }}
+        style={{ transformOrigin: isLeft ? 'left center' : 'right center' }}
         className={`ml-8 md:ml-0 md:w-[calc(50%-2rem)] ${
           isLeft ? 'md:mr-auto md:pr-8' : 'md:ml-auto md:pl-8'
         }`}
