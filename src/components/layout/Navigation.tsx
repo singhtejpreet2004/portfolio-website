@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Menu, X, Sun, Moon, Download,
-  User, Code2, Briefcase, FolderOpen,
+  Star, User, Code2, Briefcase, FolderOpen,
   GraduationCap, Trophy, Mail,
   type LucideIcon,
 } from 'lucide-react';
@@ -59,19 +59,13 @@ export default function Navigation() {
         transition={{ type: 'spring', stiffness: 280, damping: 28 }}
         className="hidden md:flex fixed right-4 top-1/2 -translate-y-1/2 z-50 flex-col items-center gap-1 glass rounded-2xl px-2 py-3 shadow-xl"
       >
-        {/* Avatar — top of dock */}
+        {/* Star — top of dock, links back to hero */}
         <a
           href="#hero"
-          className="flex items-center justify-center w-9 h-9 rounded-full overflow-hidden border-2 border-[var(--color-yellow)]/50 hover:border-[var(--color-yellow)] transition-all mb-1"
-          title="Back to top"
+          className="flex items-center justify-center w-9 h-9 rounded-full border-2 border-[var(--color-yellow)]/50 hover:border-[var(--color-yellow)] hover:bg-[var(--color-yellow)]/10 transition-all mb-1 text-[var(--color-yellow)]"
+          title="Home"
         >
-          <div className="w-full h-full bg-gradient-to-br from-[var(--color-yellow)]/20 to-[var(--color-purple)]/20 flex items-center justify-center">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" className="text-[var(--color-yellow)]">
-              <circle cx="12" cy="8" r="4" fill="currentColor" opacity="0.8" />
-              <path d="M4 20c0-4.4 3.6-8 8-8s8 3.6 8 8" fill="currentColor" opacity="0.5" />
-              <path d="M6 8a6 6 0 0 1 12 0" stroke="currentColor" strokeWidth="1.5" fill="none" opacity="0.4" />
-            </svg>
-          </div>
+          <Star size={16} fill="currentColor" />
         </a>
 
         {/* Divider */}
@@ -137,17 +131,12 @@ export default function Navigation() {
         transition={{ duration: 0.3 }}
         className="md:hidden fixed top-3 left-3 right-3 z-50 glass rounded-full px-3 py-2 flex items-center justify-between shadow-lg"
       >
-        {/* Avatar */}
+        {/* Star — home */}
         <a
           href="#hero"
-          className="flex items-center justify-center w-8 h-8 rounded-full overflow-hidden border-2 border-[var(--color-yellow)]/50"
+          className="flex items-center justify-center w-8 h-8 rounded-full border-2 border-[var(--color-yellow)]/50 text-[var(--color-yellow)]"
         >
-          <div className="w-full h-full bg-gradient-to-br from-[var(--color-yellow)]/20 to-[var(--color-purple)]/20 flex items-center justify-center">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" className="text-[var(--color-yellow)]">
-              <circle cx="12" cy="8" r="4" fill="currentColor" opacity="0.8" />
-              <path d="M4 20c0-4.4 3.6-8 8-8s8 3.6 8 8" fill="currentColor" opacity="0.5" />
-            </svg>
-          </div>
+          <Star size={14} fill="currentColor" />
         </a>
 
         <div className="flex items-center gap-1">
