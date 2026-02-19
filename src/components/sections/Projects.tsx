@@ -207,76 +207,111 @@ function ProjectPopup({
 }
 
 // ─────────────────────────────────────────────────────────
-// COMMIT NODE (same as Experience)
+// COMMIT NODE — burst flash + continuous ripple rings
 // ─────────────────────────────────────────────────────────
 
 function CommitNode({ active, featured = false }: { active: boolean; featured?: boolean }) {
-  const accent = featured ? 'var(--color-yellow)' : 'var(--color-cyan)';
+  const accent     = featured ? 'var(--color-yellow)' : 'var(--color-cyan)';
   const accentRgba = featured ? 'rgba(255,211,0,0.55)' : 'rgba(88,166,255,0.55)';
 
   return (
     <div className="relative flex items-center justify-center w-5 h-5">
-      {/* Ripples — only when active */}
-      {active && ([0, 0.7, 1.4] as number[]).map((off) => (
+      {/* One-time burst when becoming active */}
+      <AnimatePresence>
+        {active && (
+          <motion.div
+            key="burst"
+            className="absolute w-full h-full rounded-full"
+            style={{ background: accent }}
+            initial={{ scale: 1, opacity: 0.85 }}
+            animate={{ scale: 5.5, opacity: 0 }}
+            exit={{}}
+            transition={{ duration: 0.55, ease: 'easeOut' }}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Staggered ripple rings — only when active */}
+      {active && ([0, 0.75, 1.5] as number[]).map((off) => (
         <motion.div
           key={off}
           className="absolute w-full h-full rounded-full"
           style={{ background: accent }}
-          animate={{ scale: [1, 2.8, 1], opacity: [0.35, 0, 0.35] }}
-          transition={{ duration: 2.4, repeat: Infinity, ease: 'easeOut', delay: off }}
+          animate={{ scale: [1, 3.2, 1], opacity: [0.38, 0, 0.38] }}
+          transition={{ duration: 2.6, repeat: Infinity, ease: 'easeOut', delay: off }}
         />
       ))}
+
       {/* Dot */}
       <motion.div
         className="relative w-3.5 h-3.5 rounded-full border-2"
         animate={{
-          borderColor: active ? accent : 'rgba(88,166,255,0.25)',
-          background:  active ? 'var(--bg-primary)' : 'var(--bg-primary)',
-          boxShadow:   active ? `0 0 10px ${accentRgba}` : '0 0 0 transparent',
+          borderColor: active ? accent : 'rgba(88,166,255,0.22)',
+          boxShadow:   active ? `0 0 14px ${accentRgba}` : '0 0 0 transparent',
+          scale:       active ? [1, 1.25, 1] : 1,
         }}
-        transition={{ duration: 0.35 }}
+        transition={{
+          scale:       { duration: 0.45, ease: 'easeOut' },
+          borderColor: { duration: 0.3 },
+          boxShadow:   { duration: 0.3 },
+        }}
+        style={{ background: 'var(--bg-primary)' }}
       />
     </div>
   );
 }
 
 // ─────────────────────────────────────────────────────────
-// BRANCH CONNECTOR — straight down with glow
+// CURVED BRANCH CONNECTOR — S-curve from dot down to card
 // ─────────────────────────────────────────────────────────
 
-const BRANCH_H = 48; // px
-const BRANCH_PATH = `M 10 0 L 10 ${BRANCH_H}`;
+const BRANCH_H = 88; // px  — tall enough to fill space + show curve
+// S-curve: starts at top-center, loops right, lands at bottom-center
+const BRANCH_PATH = 'M 20 0 C 38 22 2 52 20 88';
 
 function BranchConnector({ active }: { active: boolean }) {
   return (
     <svg
-      viewBox={`0 0 20 ${BRANCH_H}`}
+      viewBox="0 0 40 88"
+      preserveAspectRatio="none"
       className="block mx-auto pointer-events-none"
-      style={{ width: 20, height: BRANCH_H }}
+      style={{ width: 40, height: BRANCH_H }}
       aria-hidden
     >
-      {/* Base */}
+      {/* Dim base */}
       <motion.path
         d={BRANCH_PATH}
         stroke="var(--color-cyan)"
         strokeWidth="1.5"
         vectorEffect="non-scaling-stroke"
         fill="none"
-        animate={{ strokeOpacity: active ? 0.55 : 0.18 }}
-        transition={{ duration: 0.35 }}
+        animate={{ strokeOpacity: active ? 0.5 : 0.14 }}
+        transition={{ duration: 0.4 }}
       />
-      {/* Glow overlay */}
+      {/* Glow layer */}
       <motion.path
         d={BRANCH_PATH}
         stroke="var(--color-cyan)"
         strokeWidth="1"
         vectorEffect="non-scaling-stroke"
         fill="none"
-        style={{ filter: 'drop-shadow(0 0 3px rgba(88,166,255,0.7))' }}
-        animate={{ strokeOpacity: active ? 0.8 : 0 }}
-        transition={{ duration: 0.35 }}
+        style={{ filter: 'drop-shadow(0 0 3px rgba(88,166,255,0.75))' }}
+        animate={{ strokeOpacity: active ? 0.85 : 0 }}
+        transition={{ duration: 0.4 }}
       />
-      {/* Traveling pulse — only on active */}
+      {/* Draw-in on first appear */}
+      <motion.path
+        d={BRANCH_PATH}
+        stroke="var(--color-cyan)"
+        strokeWidth="1.5"
+        vectorEffect="non-scaling-stroke"
+        fill="none"
+        strokeOpacity={0}
+        initial={{ pathLength: 0 }}
+        animate={{ pathLength: 1 }}
+        transition={{ duration: 0.7, ease: 'easeOut', delay: 0.3 }}
+      />
+      {/* Traveling white pulse — active only */}
       {active && (
         <motion.path
           d={BRANCH_PATH}
@@ -286,10 +321,10 @@ function BranchConnector({ active }: { active: boolean }) {
           fill="none"
           strokeLinecap="round"
           strokeOpacity="0.85"
-          style={{ filter: 'drop-shadow(0 0 4px rgba(255,255,255,0.6))' }}
-          initial={{ pathLength: 0.2, pathOffset: 0 }}
-          animate={{ pathLength: 0.2, pathOffset: 0.8 }}
-          transition={{ duration: 0.45, ease: 'easeInOut', repeat: Infinity, repeatDelay: 1.6 }}
+          style={{ filter: 'drop-shadow(0 0 5px rgba(255,255,255,0.65))' }}
+          initial={{ pathLength: 0.18, pathOffset: 0 }}
+          animate={{ pathLength: 0.18, pathOffset: 0.82 }}
+          transition={{ duration: 0.5, ease: 'easeInOut', repeat: Infinity, repeatDelay: 1.4 }}
         />
       )}
     </svg>
@@ -297,35 +332,107 @@ function BranchConnector({ active }: { active: boolean }) {
 }
 
 // ─────────────────────────────────────────────────────────
-// CARD ITEM — dot + branch + card, all in one column
+// CARD ITEM — date label + dot + curved branch + meta + card
 // ─────────────────────────────────────────────────────────
 
-const CARD_W   = 420;
-const CARD_GAP = 100;
+const CARD_W     = 420;
+const CARD_GAP   = 100;
 const CARD_STRIDE = CARD_W + CARD_GAP;
 
 function CardItem({
   project,
+  index,
+  total,
   state,
   onClick,
 }: {
   project: (typeof projects)[0];
+  index: number;
+  total: number;
   state: 'active' | 'left' | 'right';
   onClick: () => void;
 }) {
   const isActive = state === 'active';
   const isLeft   = state === 'left';
 
+  // Derive a slug for the git branch label
+  const branchSlug = project.category
+    .toLowerCase()
+    .replace(/\s+/g, '-')
+    .replace(/[^a-z0-9-]/g, '');
+
   return (
     <div
       className="relative flex flex-col items-center"
       style={{ width: CARD_W, flexShrink: 0 }}
     >
+      {/* ── Date label above dot — springs in when active ── */}
+      <div className="relative h-8 flex items-end justify-center mb-1">
+        <AnimatePresence>
+          {isActive && (
+            <motion.span
+              key="date"
+              initial={{ opacity: 0, y: 10, scale: 0.75 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 6, scale: 0.85 }}
+              transition={{ type: 'spring', stiffness: 450, damping: 26 }}
+              className="absolute bottom-0 text-xs font-[family-name:var(--font-jetbrains)] tracking-wide whitespace-nowrap"
+              style={{ color: project.featured ? 'var(--color-yellow)' : 'var(--color-cyan)' }}
+            >
+              {project.date}
+            </motion.span>
+          )}
+        </AnimatePresence>
+      </div>
+
       {/* Dot — sits on the spine line */}
       <CommitNode active={isActive} featured={project.featured} />
 
-      {/* Branch downward */}
+      {/* Curved branch downward */}
       <BranchConnector active={isActive} />
+
+      {/* ── Git meta strip — fills connector space with character ── */}
+      <div className="w-full flex flex-col items-center gap-1.5 mb-4">
+        <AnimatePresence mode="wait">
+          {isActive ? (
+            <motion.div
+              key="active-meta"
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -6 }}
+              transition={{ duration: 0.35, ease: 'easeOut' }}
+              className="flex flex-col items-center gap-1.5 w-full"
+            >
+              {/* Branch name */}
+              <div
+                className="flex items-center gap-1.5 px-3 py-1 rounded-full border"
+                style={{
+                  background: 'rgba(88,166,255,0.07)',
+                  borderColor: 'rgba(88,166,255,0.22)',
+                }}
+              >
+                <span className="text-[10px] text-[var(--color-cyan)] opacity-60">⎇</span>
+                <span className="text-[11px] font-[family-name:var(--font-jetbrains)] text-[var(--color-cyan)]">
+                  feature/{branchSlug}
+                </span>
+              </div>
+              {/* Commit counter */}
+              <span className="text-[10px] font-[family-name:var(--font-jetbrains)] text-[var(--text-secondary)] opacity-50">
+                commit {String(index + 1).padStart(2, '0')}/{String(total).padStart(2, '0')}
+              </span>
+            </motion.div>
+          ) : (
+            <motion.div
+              key="inactive-meta"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: isLeft ? 0.1 : 0.3 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3 }}
+              className="h-9" // spacer to keep layout stable
+            />
+          )}
+        </AnimatePresence>
+      </div>
 
       {/* Card */}
       <motion.div
@@ -534,13 +641,17 @@ export default function Projects() {
         {/* Card track area */}
         <div className="flex-1 relative overflow-hidden flex items-start">
 
-          {/* ── HORIZONTAL SPINE LINE (fixed, behind everything) ── */}
+          {/* ── HORIZONTAL SPINE LINE (fixed overlay, behind everything) ──
+               top = 32px: date label (h-8=32px) + 1px(margin) = 33 → use 42 to hit CommitNode center
+               CommitNode is h-5=20px. Its center is at 10px. Date area is h-8(32px) + mb-1(4px) = 36px above dot.
+               So dot center from card-item top = 36 + 10 = 46px.
+          ── */}
           <motion.div
             className="absolute z-0 pointer-events-none"
             style={{
               left: 0,
               right: 0,
-              top: 10, // aligns with dot center in each card item (10px = CommitNode center offset)
+              top: 46,
               height: 2,
               background: 'linear-gradient(to right, transparent 2%, rgba(88,166,255,0.18) 8%, rgba(88,166,255,0.18) 92%, transparent 98%)',
             }}
@@ -553,7 +664,7 @@ export default function Projects() {
           {entered && (
             <div
               className="absolute z-0 pointer-events-none overflow-hidden"
-              style={{ left: 0, right: 0, top: 10, height: 2 }}
+              style={{ left: 0, right: 0, top: 46, height: 2 }}
             >
               <motion.div
                 style={{
@@ -567,33 +678,6 @@ export default function Projects() {
               />
             </div>
           )}
-
-          {/* Progress fill on spine — from left edge to active card center */}
-          <div
-            className="absolute z-0 pointer-events-none"
-            style={{
-              left: 0,
-              top: 10,
-              height: 2,
-              overflow: 'hidden',
-              // width covers from left of viewport to center (where active card sits)
-              width: '50%',
-            }}
-          >
-            <motion.div
-              style={{
-                position: 'absolute',
-                right: 0,
-                top: 0,
-                height: '100%',
-                background: 'linear-gradient(to right, transparent, var(--color-cyan) 40%)',
-                boxShadow: '0 0 8px rgba(88,166,255,0.5)',
-                width: '60px',
-              }}
-              animate={{ opacity: entered ? 1 : 0 }}
-              transition={{ duration: 0.4 }}
-            />
-          </div>
 
           {/* ── CARD TRACK ── scrolls horizontally */}
           {/* Positioned at left:50% so card 0 (at -CARD_W/2) starts centered */}
@@ -613,7 +697,7 @@ export default function Projects() {
               <motion.div
                 className="absolute pointer-events-none"
                 style={{
-                  top: 10, // dot center y
+                  top: 46, // dot center y (36px date area + 10px dot center)
                   left: CARD_W / 2,
                   width: (n - 1) * CARD_STRIDE,
                   height: 2,
@@ -630,7 +714,7 @@ export default function Projects() {
             <motion.div
               className="absolute pointer-events-none"
               style={{
-                top: 10,
+                top: 46,
                 left: CARD_W / 2,
                 height: 2,
                 background: 'linear-gradient(to right, var(--color-cyan), rgba(88,166,255,0.4))',
@@ -652,6 +736,8 @@ export default function Projects() {
                 <CardItem
                   key={project.id}
                   project={project}
+                  index={i}
+                  total={n}
                   state={state}
                   onClick={() => setSelectedId(project.id)}
                 />
