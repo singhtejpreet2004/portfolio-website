@@ -722,8 +722,6 @@ export default function Skills() {
             ...treeLines.filter((l): l is Line => !!l),
           ]);
           setInputEnabled(true);
-          const ft = setTimeout(() => inputRef.current?.focus(), 100);
-          timers.push(ft);
         }, 400);
         timers.push(t);
         return;

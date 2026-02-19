@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion';
 import { MapPin, Star, X } from 'lucide-react';
 import SectionHeading from '@/components/ui/SectionHeading';
@@ -137,7 +137,7 @@ function ExperiencePopup({
 }
 
 // ─────────────────────────────────────────────────────────
-// COMMIT NODE — pulsing dot on trunk
+// COMMIT NODE — burst flash + 3 staggered ripple rings
 // ─────────────────────────────────────────────────────────
 
 function CommitNode({ delay = 0 }: { delay?: number }) {
@@ -149,32 +149,47 @@ function CommitNode({ delay = 0 }: { delay?: number }) {
       viewport={{ once: true }}
       transition={{ type: 'spring', stiffness: 400, damping: 20, delay }}
     >
-      <div
-        className="w-3.5 h-3.5 rounded-full border-2 border-[var(--color-cyan)]"
-        style={{ background: 'var(--bg-primary)' }}
-      />
+      {/* One-time burst flash on appear */}
       <motion.div
         className="absolute inset-0 rounded-full bg-[var(--color-cyan)]"
-        animate={{ scale: [1, 2.4, 1], opacity: [0.55, 0, 0.55] }}
-        transition={{ duration: 2.4, repeat: Infinity, ease: 'easeInOut', delay }}
+        initial={{ scale: 1, opacity: 0.9 }}
+        whileInView={{ scale: 5, opacity: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.6, delay: delay + 0.1, ease: 'easeOut' }}
+      />
+
+      {/* 3 staggered continuous ripple rings */}
+      {([0, 0.7, 1.4] as number[]).map((ringOffset) => (
+        <motion.div
+          key={ringOffset}
+          className="absolute inset-0 rounded-full bg-[var(--color-cyan)]"
+          animate={{ scale: [1, 2.8, 1], opacity: [0.4, 0, 0.4] }}
+          transition={{
+            duration: 2.4,
+            repeat: Infinity,
+            ease: 'easeOut',
+            delay: delay + ringOffset,
+          }}
+        />
+      ))}
+
+      {/* The dot */}
+      <div
+        className="relative w-3.5 h-3.5 rounded-full border-2 border-[var(--color-cyan)]"
+        style={{
+          background: 'var(--bg-primary)',
+          boxShadow: '0 0 10px rgba(88,166,255,0.55)',
+        }}
       />
     </motion.div>
   );
 }
 
 // ─────────────────────────────────────────────────────────
-// GIT BRANCH SVG CONNECTOR
+// GIT BRANCH CONNECTOR — draw-in + traveling pulse
 // ─────────────────────────────────────────────────────────
 
 function BranchConnector({ side, delay = 0 }: { side: 'left' | 'right'; delay?: number }) {
-  // Git PR branch shape:
-  //   - starts at the trunk node (x=0 in right branch space)
-  //   - curves diagonally outward (like `git checkout -b branch`)
-  //   - then runs horizontally to the card
-  // viewBox "0 0 100 40": x=0 is trunk, x=100 is card left/right edge
-  // Path: M 0,0 (node) → quarter-bezier diagonal → then horizontal at y=38
-  // The curve is: M 0 0 C 0 24, 28 38, 40 38 L 100 38
-  //   reads as: start at trunk top, curve outward, then straight across
   const d = 'M 0 0 C 0 26 30 38 44 38 L 100 38';
 
   return (
@@ -189,24 +204,82 @@ function BranchConnector({ side, delay = 0 }: { side: 'left' | 'right'; delay?: 
       }`}
       style={side === 'left' ? { transform: 'scaleX(-1)' } : undefined}
     >
+      {/* Base path — draws in */}
       <motion.path
         d={d}
         stroke="var(--color-cyan)"
         strokeWidth="1.5"
         vectorEffect="non-scaling-stroke"
         fill="none"
-        strokeOpacity="0.5"
+        strokeOpacity="0.35"
         initial={{ pathLength: 0, opacity: 0 }}
         whileInView={{ pathLength: 1, opacity: 1 }}
         viewport={{ once: true }}
-        transition={{ duration: 0.65, delay, ease: 'easeOut' }}
+        transition={{ duration: 0.6, delay, ease: 'easeOut' }}
+      />
+      {/* Glow overlay — thinner, brighter */}
+      <motion.path
+        d={d}
+        stroke="var(--color-cyan)"
+        strokeWidth="1"
+        vectorEffect="non-scaling-stroke"
+        fill="none"
+        strokeOpacity="0.65"
+        style={{ filter: 'drop-shadow(0 0 2px rgba(88,166,255,0.7))' }}
+        initial={{ pathLength: 0, opacity: 0 }}
+        whileInView={{ pathLength: 1, opacity: 1 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.6, delay, ease: 'easeOut' }}
+      />
+      {/* Traveling pulse — white segment sweeps from 0% to 100% of path */}
+      <motion.path
+        d={d}
+        stroke="white"
+        strokeWidth="2.5"
+        vectorEffect="non-scaling-stroke"
+        fill="none"
+        strokeLinecap="round"
+        strokeOpacity="0.85"
+        style={{ filter: 'drop-shadow(0 0 4px rgba(255,255,255,0.6))' }}
+        initial={{ pathLength: 0.16, pathOffset: 0 }}
+        whileInView={{ pathLength: 0.16, pathOffset: 0.84 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.5, delay: delay + 0.58, ease: 'easeInOut' }}
       />
     </svg>
   );
 }
 
 // ─────────────────────────────────────────────────────────
-// TIMELINE CARD — scroll-appear + scroll-fade
+// SHARED ANIMATION VARIANTS (module-level — stable references)
+// ─────────────────────────────────────────────────────────
+
+const rowVariants = {
+  hidden: { opacity: 0, y: 14 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { type: 'spring' as const, stiffness: 300, damping: 26 },
+  },
+};
+
+const badgeVariants = {
+  hidden: { opacity: 0, scale: 0.55 },
+  visible: {
+    opacity: 1,
+    scale: 1,
+    transition: { type: 'spring' as const, stiffness: 500, damping: 22 },
+  },
+};
+
+// Stable module-level variant for badge stagger group
+const badgeGroupVariants = {
+  hidden: {},
+  visible: { transition: { staggerChildren: 0.038 } },
+};
+
+// ─────────────────────────────────────────────────────────
+// TIMELINE CARD — 3D entrance + staggered content + hover tilt
 // ─────────────────────────────────────────────────────────
 
 function TimelineCard({
@@ -220,27 +293,34 @@ function TimelineCard({
 }) {
   const isLeft = index % 2 === 0;
   const rowRef = useRef<HTMLDivElement>(null);
+  const delay = index * 0.08;
 
-  // Scroll-driven: fade in on enter, fade out on exit
+  // Scroll-driven appear / disappear
   const { scrollYProgress } = useScroll({
     target: rowRef,
     offset: ['start end', 'end start'],
   });
   const opacity = useTransform(scrollYProgress, [0, 0.12, 0.80, 1], [0, 1, 1, 0]);
-  const y       = useTransform(scrollYProgress, [0, 0.12, 0.80, 1], [40, 0, 0, -20]);
-  const scale   = useTransform(scrollYProgress, [0, 0.12, 0.80, 1], [0.96, 1, 1, 0.98]);
+  const y       = useTransform(scrollYProgress, [0, 0.12, 0.80, 1], [52, 0, 0, -28]);
+  const scale   = useTransform(scrollYProgress, [0, 0.12, 0.80, 1], [0.92, 1, 1, 0.96]);
 
-  const delay = index * 0.08;
+  // Stagger container — memoized so the variants object reference is stable
+  const contentVariants = useMemo(() => ({
+    hidden: {},
+    visible: {
+      transition: { staggerChildren: 0.065, delayChildren: delay + 0.24 },
+    },
+  }), [delay]);
 
   return (
     <div ref={rowRef} className="relative min-h-[56px]">
-      {/* ── Node on trunk (desktop: center, mobile: left-6) ── */}
+      {/* ── Node on trunk ── */}
       <div className="absolute left-6 md:left-1/2 -translate-x-1/2 top-7 z-10">
         <CommitNode delay={delay} />
       </div>
 
       {/* ── SVG git branch connector ── */}
-      <BranchConnector side={isLeft ? 'left' : 'right'} delay={delay + 0.15} />
+      <BranchConnector side={isLeft ? 'left' : 'right'} delay={delay + 0.12} />
 
       {/* ── Mobile horizontal stub ── */}
       <motion.div
@@ -252,85 +332,130 @@ function TimelineCard({
         transition={{ duration: 0.4, delay }}
       />
 
-      {/* ── Card ── */}
+      {/* ── Scroll-driven wrapper ── */}
       <motion.div
         style={{ opacity, y, scale }}
         className={`
-          /* mobile: always to the right of left trunk */
           ml-14
-          /* desktop: alternating */
           md:ml-0
-          ${isLeft
-            ? 'md:mr-[calc(50%+2rem)] md:pt-10'
-            : 'md:ml-[calc(50%+2rem)] md:pt-10'}
+          ${isLeft ? 'md:mr-[calc(50%+2rem)] md:pt-10' : 'md:ml-[calc(50%+2rem)] md:pt-10'}
           pt-2
         `}
       >
+        {/* ── Card: 3D flip-in + hover tilt ── */}
+        {/* perspective:900 on the same element as rotateX → correct 3D chain */}
         <motion.div
-          whileHover={{ y: -3, transition: { type: 'spring', stiffness: 400, damping: 24 } }}
+          initial={{ rotateX: 16 }}
+          whileInView={{ rotateX: 0 }}
+          viewport={{ once: true }}
+          transition={{ type: 'spring', stiffness: 150, damping: 22, delay: delay + 0.04 }}
+          whileHover={{
+            y: -5,
+            rotateX: -1.5,
+            rotateY: isLeft ? 2.5 : -2.5,
+            boxShadow: '0 14px 52px rgba(0,0,0,0.38), 0 0 28px rgba(88,166,255,0.1)',
+            transition: { type: 'spring', stiffness: 340, damping: 28 },
+          }}
           onClick={onOpen}
-          className="p-5 rounded-xl border border-[var(--border-color)] hover:border-[var(--color-cyan)]/25 transition-colors duration-300 cursor-pointer group"
-          style={{ background: 'var(--bg-card)' }}
+          className="p-5 rounded-xl border border-[var(--border-color)] hover:border-[var(--color-cyan)]/30 transition-colors duration-300 cursor-pointer group relative overflow-hidden"
+          style={{ background: 'var(--bg-card)', perspective: 900 }}
         >
-          {/* Date + location */}
-          <div className="flex items-center gap-2 mb-3 flex-wrap">
-            <span className="font-[family-name:var(--font-jetbrains)] text-xs text-[var(--color-cyan)]">
-              {exp.startDate} — {exp.endDate}
-            </span>
-            <div className="flex items-center gap-1 text-xs text-[var(--text-secondary)]">
-              <MapPin size={11} />
-              {exp.location}
-            </div>
-          </div>
-
-          {/* Company + role */}
-          <h3 className="font-[family-name:var(--font-display)] text-base font-bold text-[var(--text-primary)] mb-0.5 leading-snug">
-            {exp.company}
-          </h3>
-          <p className="text-sm text-[var(--color-yellow)] font-medium mb-3">{exp.role}</p>
-
-          {/* Description */}
-          <p className="text-sm text-[var(--text-secondary)] leading-relaxed mb-4 line-clamp-3">
-            {exp.description}
-          </p>
-
-          {/* Key achievement */}
+          {/* Hover top-edge glow (CSS group-hover for performance) */}
           <div
-            className="flex items-start gap-2 p-3 rounded-lg mb-4"
-            style={{ background: 'rgba(255,211,0,0.05)', border: '1px solid rgba(255,211,0,0.14)' }}
+            className="absolute inset-0 rounded-xl pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+            style={{
+              background:
+                'radial-gradient(ellipse at 50% 0%, rgba(88,166,255,0.08) 0%, transparent 65%)',
+            }}
+          />
+
+          {/* ── Staggered content ── */}
+          <motion.div
+            variants={contentVariants}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
           >
-            <Star size={12} className="text-[var(--color-yellow)] mt-0.5 shrink-0" />
-            <span className="text-xs text-[var(--color-yellow)] leading-relaxed">{exp.keyAchievement}</span>
-          </div>
-
-          {/* Tech stack */}
-          <div className="flex flex-wrap gap-1.5 mb-4">
-            {exp.techStack.map((tech) => (
-              <span
-                key={tech}
-                className="px-2 py-0.5 rounded-full text-[11px] font-medium border"
-                style={{
-                  background: 'rgba(88,166,255,0.07)',
-                  borderColor: 'rgba(88,166,255,0.18)',
-                  color: 'var(--color-cyan)',
-                }}
-              >
-                {tech}
+            {/* Date + location */}
+            <motion.div variants={rowVariants} className="flex items-center gap-2 mb-3 flex-wrap">
+              <span className="font-[family-name:var(--font-jetbrains)] text-xs text-[var(--color-cyan)]">
+                {exp.startDate} — {exp.endDate}
               </span>
-            ))}
-          </div>
+              <div className="flex items-center gap-1 text-xs text-[var(--text-secondary)]">
+                <MapPin size={11} />
+                {exp.location}
+              </div>
+            </motion.div>
 
-          {/* Expand hint */}
-          <div className="flex items-center gap-1.5 text-xs text-[var(--text-secondary)] group-hover:text-[var(--color-cyan)] transition-colors">
-            <span>View details</span>
-            <motion.span
-              animate={{ x: [0, 4, 0] }}
-              transition={{ duration: 1.6, repeat: Infinity, ease: 'easeInOut' }}
-              className="text-[var(--color-cyan)]"
+            {/* Company */}
+            <motion.h3
+              variants={rowVariants}
+              className="font-[family-name:var(--font-display)] text-base font-bold text-[var(--text-primary)] mb-0.5 leading-snug"
             >
-              →
-            </motion.span>
-          </div>
+              {exp.company}
+            </motion.h3>
+
+            {/* Role */}
+            <motion.p variants={rowVariants} className="text-sm text-[var(--color-yellow)] font-medium mb-3">
+              {exp.role}
+            </motion.p>
+
+            {/* Description */}
+            <motion.p
+              variants={rowVariants}
+              className="text-sm text-[var(--text-secondary)] leading-relaxed mb-4 line-clamp-3"
+            >
+              {exp.description}
+            </motion.p>
+
+            {/* Key achievement */}
+            <motion.div
+              variants={rowVariants}
+              className="flex items-start gap-2 p-3 rounded-lg mb-4"
+              style={{ background: 'rgba(255,211,0,0.05)', border: '1px solid rgba(255,211,0,0.14)' }}
+            >
+              <Star size={12} className="text-[var(--color-yellow)] mt-0.5 shrink-0" />
+              <span className="text-xs text-[var(--color-yellow)] leading-relaxed">
+                {exp.keyAchievement}
+              </span>
+            </motion.div>
+
+            {/* Tech badges — own stagger (module-level variants = stable ref) */}
+            <motion.div
+              variants={badgeGroupVariants}
+              className="flex flex-wrap gap-1.5 mb-4"
+            >
+              {exp.techStack.map((tech) => (
+                <motion.span
+                  key={tech}
+                  variants={badgeVariants}
+                  className="px-2 py-0.5 rounded-full text-[11px] font-medium border"
+                  style={{
+                    background: 'rgba(88,166,255,0.07)',
+                    borderColor: 'rgba(88,166,255,0.18)',
+                    color: 'var(--color-cyan)',
+                  }}
+                >
+                  {tech}
+                </motion.span>
+              ))}
+            </motion.div>
+
+            {/* Expand hint */}
+            <motion.div
+              variants={rowVariants}
+              className="flex items-center gap-1.5 text-xs text-[var(--text-secondary)] group-hover:text-[var(--color-cyan)] transition-colors"
+            >
+              <span>View details</span>
+              <motion.span
+                animate={{ x: [0, 4, 0] }}
+                transition={{ duration: 1.6, repeat: Infinity, ease: 'easeInOut' }}
+                className="text-[var(--color-cyan)]"
+              >
+                →
+              </motion.span>
+            </motion.div>
+          </motion.div>
         </motion.div>
       </motion.div>
     </div>
@@ -346,7 +471,7 @@ export default function Experience() {
 
   return (
     <section id="experience" className="relative py-24 md:py-32">
-      {/* Background glow */}
+      {/* Background glows */}
       <div
         className="absolute top-1/3 right-0 w-[500px] h-[500px] opacity-[0.05] blur-3xl pointer-events-none"
         style={{ background: 'radial-gradient(circle, var(--color-purple) 0%, transparent 70%)' }}
@@ -364,17 +489,39 @@ export default function Experience() {
 
         {/* Timeline container */}
         <div className="relative mt-12">
-          {/* Main trunk — desktop: center, mobile: left-6 */}
+          {/* Main trunk line */}
           <motion.div
             className="absolute left-6 md:left-1/2 top-0 bottom-0 w-[2px] md:-translate-x-px"
             style={{
-              background: 'linear-gradient(to bottom, var(--color-cyan), rgba(88,166,255,0.25) 80%, transparent)',
+              background:
+                'linear-gradient(to bottom, var(--color-cyan), rgba(88,166,255,0.25) 80%, transparent)',
             }}
             initial={{ scaleY: 0, transformOrigin: 'top' }}
             whileInView={{ scaleY: 1 }}
             viewport={{ once: true }}
             transition={{ duration: 1.4, ease: 'easeOut' }}
           />
+
+          {/* Trunk shimmer — scrolling pulse traveling down the line */}
+          <div className="absolute left-6 md:left-1/2 -translate-x-px top-0 bottom-0 w-[2px] overflow-hidden pointer-events-none">
+            <motion.div
+              style={{
+                position: 'absolute',
+                width: '100%',
+                height: '28%',
+                background:
+                  'linear-gradient(to bottom, transparent 0%, rgba(88,166,255,0.75) 35%, rgba(88,166,255,0.9) 50%, rgba(88,166,255,0.75) 65%, transparent 100%)',
+              }}
+              animate={{ y: ['-28%', '128%'] }}
+              transition={{
+                duration: 2.6,
+                repeat: Infinity,
+                ease: 'linear',
+                repeatDelay: 1.0,
+                delay: 1.6,
+              }}
+            />
+          </div>
 
           {/* Cards */}
           <div className="space-y-20 md:space-y-24">
