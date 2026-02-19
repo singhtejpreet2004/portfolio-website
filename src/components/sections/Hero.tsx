@@ -1359,7 +1359,12 @@ function VideoPipelineDashboard({ overdrive, onToast }: { overdrive: boolean; on
 
 // Bar chart for video pipeline
 function BarChart({ paused, overdrive }: { paused: boolean; overdrive: boolean }) {
-  const [bars, setBars] = useState<number[]>(() => Array.from({ length: 18 }, () => 30 + Math.random() * 60));
+  const [bars, setBars] = useState<number[]>([]);
+
+  useEffect(() => {
+    // Seed initial bars on client only — avoids SSR/client hydration mismatch
+    setBars(Array.from({ length: 18 }, () => 30 + Math.random() * 60));
+  }, []);
 
   useEffect(() => {
     if (paused) return;
