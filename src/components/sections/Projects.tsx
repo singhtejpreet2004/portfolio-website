@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState, useEffect } from 'react';
+import { useRef, useState, useEffect, useCallback } from 'react';
 import {
   motion,
   AnimatePresence,
@@ -345,12 +345,14 @@ function CardItem({
   total,
   state,
   onClick,
+  onBranchClick,
 }: {
   project: (typeof projects)[0];
   index: number;
   total: number;
   state: 'active' | 'left' | 'right';
   onClick: () => void;
+  onBranchClick: () => void;
 }) {
   const isActive = state === 'active';
   const isLeft   = state === 'left';
@@ -553,6 +555,195 @@ function CardItem({
 }
 
 // ─────────────────────────────────────────────────────────
+// EASTER EGG 1 — PR Merge toast (click branch label)
+// ─────────────────────────────────────────────────────────
+
+function PRMergeToast({ project, onDone }: { project: (typeof projects)[0]; onDone: () => void }) {
+  const sha = Math.random().toString(16).slice(2, 9);
+  useEffect(() => {
+    const t = setTimeout(onDone, 3200);
+    return () => clearTimeout(t);
+  }, [onDone]);
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20, scale: 0.88 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      exit={{ opacity: 0, y: -12, scale: 0.92 }}
+      transition={{ type: 'spring', stiffness: 380, damping: 28 }}
+      className="fixed bottom-8 left-1/2 -translate-x-1/2 z-[300] flex items-center gap-3 px-5 py-3 rounded-2xl shadow-2xl"
+      style={{
+        background: 'linear-gradient(135deg, rgba(91,204,126,0.15) 0%, rgba(88,166,255,0.08) 100%)',
+        border: '1px solid rgba(91,204,126,0.35)',
+        backdropFilter: 'blur(12px)',
+      }}
+    >
+      <span className="text-base">🟣</span>
+      <div>
+        <p className="text-sm font-medium text-[var(--text-primary)]">
+          PR merged into <span className="text-[var(--color-cyan)]">main</span>
+        </p>
+        <p className="text-[11px] font-[family-name:var(--font-jetbrains)] text-[var(--text-secondary)]">
+          feat/{project.category.toLowerCase().replace(/\s+/g, '-')} · {sha}
+        </p>
+      </div>
+      <span className="text-[var(--color-green)] text-sm font-bold">✓ Merged</span>
+    </motion.div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────
+// EASTER EGG 2 — git log terminal (triple-click active card)
+// ─────────────────────────────────────────────────────────
+
+function GitLogTerminal({ projects: projs, onClose }: { projects: typeof projects; onClose: () => void }) {
+  useEffect(() => {
+    const h = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+    window.addEventListener('keydown', h);
+    return () => window.removeEventListener('keydown', h);
+  }, [onClose]);
+
+  const lines = projs.map((p) => ({
+    sha: Math.random().toString(16).slice(2, 9),
+    msg: `feat(${p.category.toLowerCase().replace(/\s+/g, '-')}): ${p.title.split(' ').slice(0, 5).join(' ')}`,
+    date: p.date,
+  }));
+
+  return (
+    <motion.div
+      className="fixed inset-0 z-[200] flex items-center justify-center p-6"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      onClick={onClose}
+    >
+      <div className="absolute inset-0" style={{ background: 'rgba(6,11,21,0.7)', backdropFilter: 'blur(10px)' }} />
+      <motion.div
+        className="relative z-10 w-full max-w-lg rounded-xl border border-[var(--border-color)] overflow-hidden shadow-2xl"
+        style={{ background: '#0d1117' }}
+        initial={{ scale: 0.88, y: 24, opacity: 0 }}
+        animate={{ scale: 1, y: 0, opacity: 1 }}
+        exit={{ scale: 0.92, y: 16, opacity: 0 }}
+        transition={{ type: 'spring', stiffness: 340, damping: 28 }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Terminal header */}
+        <div className="flex items-center gap-2 px-4 py-3 border-b border-[var(--border-color)]" style={{ background: '#161b22' }}>
+          <div className="flex gap-1.5">
+            <div className="w-3 h-3 rounded-full bg-[#ff5f57]" />
+            <div className="w-3 h-3 rounded-full bg-[#febc2e]" />
+            <div className="w-3 h-3 rounded-full bg-[#28c840]" />
+          </div>
+          <span className="text-xs font-[family-name:var(--font-jetbrains)] text-[var(--text-secondary)] ml-2">
+            git log --oneline --graph
+          </span>
+        </div>
+
+        {/* Log lines */}
+        <div className="p-4 space-y-2">
+          <p className="text-[11px] font-[family-name:var(--font-jetbrains)] text-[var(--text-secondary)] mb-3">
+            * HEAD → main
+          </p>
+          {lines.map((line, i) => (
+            <motion.div
+              key={i}
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: i * 0.1 + 0.15 }}
+              className="flex items-start gap-3 font-[family-name:var(--font-jetbrains)] text-[12px]"
+            >
+              <span className="text-[var(--color-yellow)] shrink-0">* </span>
+              <span className="text-[var(--color-green)] shrink-0">{line.sha}</span>
+              <span className="text-[var(--text-primary)] flex-1 leading-relaxed">{line.msg}</span>
+              <span className="text-[var(--text-secondary)] shrink-0 text-[10px]">{line.date}</span>
+            </motion.div>
+          ))}
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: lines.length * 0.1 + 0.3 }}
+            className="text-[11px] font-[family-name:var(--font-jetbrains)] text-[var(--text-secondary)] mt-4 opacity-60"
+          >
+            (END) · press ESC or click outside to close
+          </motion.p>
+        </div>
+      </motion.div>
+    </motion.div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────
+// EASTER EGG 3 — "all seen" celebration confetti burst
+// ─────────────────────────────────────────────────────────
+
+const CONFETTI_COLORS = ['#58a6ff', '#FFD300', '#5BCC7E', '#ff79c6', '#bd93f9'];
+
+function ConfettiPiece({ color, index }: { color: string; index: number }) {
+  const angle = (index / 18) * Math.PI * 2;
+  const dist  = 120 + Math.random() * 80;
+  return (
+    <motion.div
+      className="absolute w-2 h-2 rounded-sm pointer-events-none"
+      style={{ background: color, left: '50%', top: '50%' }}
+      initial={{ x: 0, y: 0, rotate: 0, opacity: 1 }}
+      animate={{
+        x: Math.cos(angle) * dist,
+        y: Math.sin(angle) * dist,
+        rotate: Math.random() * 360,
+        opacity: 0,
+      }}
+      transition={{ duration: 0.9 + Math.random() * 0.4, ease: [0.22, 0.68, 0, 1.2] }}
+    />
+  );
+}
+
+function AllSeenCelebration({ onDone }: { onDone: () => void }) {
+  useEffect(() => {
+    const t = setTimeout(onDone, 3000);
+    return () => clearTimeout(t);
+  }, [onDone]);
+
+  const pieces = Array.from({ length: 18 }, (_, i) => ({
+    color: CONFETTI_COLORS[i % CONFETTI_COLORS.length],
+    i,
+  }));
+
+  return (
+    <motion.div
+      className="fixed inset-0 z-[250] flex items-center justify-center pointer-events-none"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+    >
+      <div className="relative flex flex-col items-center gap-3">
+        {/* Confetti */}
+        {pieces.map(({ color, i }) => (
+          <ConfettiPiece key={i} color={color} index={i} />
+        ))}
+        <motion.div
+          initial={{ scale: 0.6, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          exit={{ scale: 0.8, opacity: 0 }}
+          transition={{ type: 'spring', stiffness: 380, damping: 22 }}
+          className="flex flex-col items-center gap-2 px-6 py-4 rounded-2xl text-center"
+          style={{
+            background: 'rgba(16,22,47,0.92)',
+            border: '1px solid rgba(88,166,255,0.3)',
+            backdropFilter: 'blur(12px)',
+          }}
+        >
+          <span className="text-2xl">🎉</span>
+          <p className="text-sm font-bold text-[var(--text-primary)]">All commits reviewed</p>
+          <p className="text-[11px] font-[family-name:var(--font-jetbrains)] text-[var(--color-cyan)]">
+            git log --all · HEAD detached @ latest
+          </p>
+        </motion.div>
+      </div>
+    </motion.div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────
 // SORT: latest first
 // ─────────────────────────────────────────────────────────
 
@@ -581,8 +772,9 @@ export default function Projects() {
   const xInitial = -(CARD_W / 2);
   const xFinal   = xInitial - (n - 1) * CARD_STRIDE;
 
+  // Smoother spring: lower stiffness = silkier feel, restSpeed avoids abrupt stop
   const rawX = useTransform(scrollYProgress, [0.12, 1], [xInitial, xFinal], { clamp: true });
-  const x    = useSpring(rawX, { stiffness: 60, damping: 18, mass: 0.6 });
+  const x    = useSpring(rawX, { stiffness: 38, damping: 14, mass: 0.9, restSpeed: 0.001 });
 
   const [activeIndex, setActiveIndex] = useState(0);
   useMotionValueEvent(rawX, 'change', (val) => {
@@ -608,6 +800,37 @@ export default function Projects() {
 
   // Spine progress fill width (inside the track, from card-0-center to active-card-center)
   const spineFilledWidth = activeIndex * CARD_STRIDE;
+
+  // ── Easter egg state ──
+  // EE1: PR merge toast — click branch label
+  const [prProject, setPrProject] = useState<(typeof projects)[0] | null>(null);
+
+  // EE2: git log terminal — triple-click active card
+  const [showGitLog, setShowGitLog] = useState(false);
+  const clickCountRef = useRef(0);
+  const clickTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const handleCardTripleClick = useCallback(() => {
+    clickCountRef.current += 1;
+    if (clickTimerRef.current) clearTimeout(clickTimerRef.current);
+    clickTimerRef.current = setTimeout(() => { clickCountRef.current = 0; }, 600);
+    if (clickCountRef.current >= 3) {
+      clickCountRef.current = 0;
+      setShowGitLog(true);
+    }
+  }, []);
+
+  // EE3: all-seen celebration — track visited project indices
+  const visitedRef   = useRef(new Set<number>([0])); // starts at 0
+  const [showAllSeen, setShowAllSeen] = useState(false);
+  const allSeenShownRef = useRef(false);
+  useEffect(() => {
+    visitedRef.current.add(activeIndex);
+    if (!allSeenShownRef.current && visitedRef.current.size === n) {
+      allSeenShownRef.current = true;
+      // small delay so the last card settles first
+      setTimeout(() => setShowAllSeen(true), 600);
+    }
+  }, [activeIndex, n]);
 
   return (
     <section
@@ -739,7 +962,11 @@ export default function Projects() {
                   index={i}
                   total={n}
                   state={state}
-                  onClick={() => setSelectedId(project.id)}
+                  onClick={() => {
+                    handleCardTripleClick();
+                    setSelectedId(project.id);
+                  }}
+                  onBranchClick={() => setPrProject(project)}
                 />
               );
             })}
@@ -812,6 +1039,33 @@ export default function Projects() {
             project={selectedProject}
             onClose={() => setSelectedId(null)}
           />
+        )}
+      </AnimatePresence>
+
+      {/* EE1: PR merge toast */}
+      <AnimatePresence>
+        {prProject && (
+          <PRMergeToast
+            project={prProject}
+            onDone={() => setPrProject(null)}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* EE2: git log terminal */}
+      <AnimatePresence>
+        {showGitLog && (
+          <GitLogTerminal
+            projects={sortedProjects}
+            onClose={() => setShowGitLog(false)}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* EE3: all-seen confetti */}
+      <AnimatePresence>
+        {showAllSeen && (
+          <AllSeenCelebration onDone={() => setShowAllSeen(false)} />
         )}
       </AnimatePresence>
     </section>
