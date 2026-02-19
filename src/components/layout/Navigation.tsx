@@ -6,19 +6,19 @@ import { Menu, X, Sun, Moon, Download } from 'lucide-react';
 import { useTheme } from '@/components/providers/ThemeProvider';
 
 const navItems = [
-  { label: 'About', href: '#about' },
-  { label: 'Skills', href: '#skills' },
-  { label: 'Experience', href: '#experience' },
-  { label: 'Projects', href: '#projects' },
-  { label: 'Education', href: '#education' },
+  { label: 'About',        href: '#about' },
+  { label: 'Skills',       href: '#skills' },
+  { label: 'Experience',   href: '#experience' },
+  { label: 'Projects',     href: '#projects' },
+  { label: 'Education',    href: '#education' },
   { label: 'Achievements', href: '#achievements' },
-  { label: 'Contact', href: '#contact' },
+  { label: 'Contact',      href: '#contact' },
 ];
 
 export default function Navigation() {
-  const [isScrolled, setIsScrolled] = useState(false);
+  const [isScrolled, setIsScrolled]       = useState(false);
   const [activeSection, setActiveSection] = useState('');
-  const [mobileOpen, setMobileOpen] = useState(false);
+  const [mobileOpen, setMobileOpen]       = useState(false);
   const { theme, toggleTheme } = useTheme();
 
   useEffect(() => {
@@ -44,84 +44,123 @@ export default function Navigation() {
 
   return (
     <>
+      {/* ── DESKTOP: vertical dock, right side ────────────────── */}
       <motion.nav
-        initial={{ y: -100, opacity: 0 }}
+        initial={{ x: 120, opacity: 0 }}
         animate={{
-          y: isScrolled ? 0 : -100,
-          opacity: isScrolled ? 1 : 0,
+          x:       isScrolled ? 0  : 120,
+          opacity: isScrolled ? 1  : 0,
         }}
-        transition={{ duration: 0.3 }}
-        className="fixed top-4 left-1/2 -translate-x-1/2 z-50 glass rounded-full px-2 py-2 shadow-lg"
+        transition={{ type: 'spring', stiffness: 280, damping: 28 }}
+        className="hidden md:flex fixed right-4 top-1/2 -translate-y-1/2 z-50 flex-col items-center gap-1 glass rounded-2xl px-2 py-3 shadow-xl"
       >
-        <div className="flex items-center gap-1">
-          {/* Avatar — LEFTMOST in nav bar */}
-          <a
-            href="#hero"
-            className="flex items-center justify-center w-9 h-9 rounded-full overflow-hidden border-2 border-[var(--color-yellow)]/50 hover:border-[var(--color-yellow)] transition-all mr-1"
-          >
-            <div className="w-full h-full bg-gradient-to-br from-[var(--color-yellow)]/20 to-[var(--color-purple)]/20 flex items-center justify-center">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" className="text-[var(--color-yellow)]">
-                <circle cx="12" cy="8" r="4" fill="currentColor" opacity="0.8" />
-                <path d="M4 20c0-4.4 3.6-8 8-8s8 3.6 8 8" fill="currentColor" opacity="0.5" />
-                <path d="M6 8a6 6 0 0 1 12 0" stroke="currentColor" strokeWidth="1.5" fill="none" opacity="0.4" />
-              </svg>
-            </div>
-          </a>
-
-          {/* Desktop Nav Items */}
-          <div className="hidden md:flex items-center gap-1">
-            {navItems.map((item) => (
-              <a
-                key={item.href}
-                href={item.href}
-                className={`relative px-3 py-1.5 text-sm rounded-full transition-colors duration-200 ${
-                  activeSection === item.href.replace('#', '')
-                    ? 'text-[var(--color-yellow)]'
-                    : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
-                }`}
-              >
-                {item.label}
-                {activeSection === item.href.replace('#', '') && (
-                  <motion.div
-                    layoutId="activeNav"
-                    className="absolute inset-0 rounded-full bg-[var(--color-yellow)]/10 border border-[var(--color-yellow)]/20"
-                    transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-                  />
-                )}
-              </a>
-            ))}
+        {/* Avatar — top of dock */}
+        <a
+          href="#hero"
+          className="flex items-center justify-center w-9 h-9 rounded-full overflow-hidden border-2 border-[var(--color-yellow)]/50 hover:border-[var(--color-yellow)] transition-all mb-1"
+          title="Back to top"
+        >
+          <div className="w-full h-full bg-gradient-to-br from-[var(--color-yellow)]/20 to-[var(--color-purple)]/20 flex items-center justify-center">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" className="text-[var(--color-yellow)]">
+              <circle cx="12" cy="8" r="4" fill="currentColor" opacity="0.8" />
+              <path d="M4 20c0-4.4 3.6-8 8-8s8 3.6 8 8" fill="currentColor" opacity="0.5" />
+              <path d="M6 8a6 6 0 0 1 12 0" stroke="currentColor" strokeWidth="1.5" fill="none" opacity="0.4" />
+            </svg>
           </div>
+        </a>
 
-          {/* Actions */}
-          <div className="flex items-center gap-1 ml-2">
-            <button
-              onClick={(e) => toggleTheme(e)}
-              className="p-2 rounded-full text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-hover)] transition-all"
-              aria-label="Toggle theme"
-            >
-              {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
-            </button>
+        {/* Divider */}
+        <div className="w-6 h-px rounded-full mb-1" style={{ background: 'var(--border-color)' }} />
 
+        {/* Nav items — vertical stack */}
+        {navItems.map((item) => {
+          const isActive = activeSection === item.href.replace('#', '');
+          return (
             <a
-              href="/resume.pdf"
-              className="hidden md:flex items-center gap-1.5 px-3 py-1.5 text-sm rounded-full bg-[var(--color-yellow)] text-[var(--color-text-dark)] font-medium hover:shadow-[var(--shadow-glow-yellow)] transition-all"
+              key={item.href}
+              href={item.href}
+              className={`relative px-3 py-1.5 text-xs font-medium rounded-full transition-colors duration-200 w-full text-center ${
+                isActive
+                  ? 'text-[var(--color-yellow)]'
+                  : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
+              }`}
             >
-              <Download size={14} />
-              Resume
+              {isActive && (
+                <motion.div
+                  layoutId="activeNav"
+                  className="absolute inset-0 rounded-full bg-[var(--color-yellow)]/10 border border-[var(--color-yellow)]/20"
+                  transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+                />
+              )}
+              <span className="relative z-10">{item.label}</span>
             </a>
+          );
+        })}
 
-            {/* Mobile menu button */}
-            <button
-              onClick={() => setMobileOpen(!mobileOpen)}
-              className="md:hidden p-2 rounded-full text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
-            >
-              {mobileOpen ? <X size={18} /> : <Menu size={18} />}
-            </button>
-          </div>
-        </div>
+        {/* Divider */}
+        <div className="w-6 h-px rounded-full mt-1 mb-1" style={{ background: 'var(--border-color)' }} />
+
+        {/* Theme toggle */}
+        <button
+          onClick={(e) => toggleTheme(e)}
+          className="p-2 rounded-full text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-hover)] transition-all"
+          aria-label="Toggle theme"
+        >
+          {theme === 'dark' ? <Sun size={15} /> : <Moon size={15} />}
+        </button>
+
+        {/* Resume — icon only in dock */}
+        <a
+          href="/resume.pdf"
+          className="flex items-center justify-center w-8 h-8 rounded-full bg-[var(--color-yellow)] text-[var(--color-text-dark)] hover:shadow-[var(--shadow-glow-yellow)] transition-all mt-0.5"
+          title="Download Resume"
+          download
+        >
+          <Download size={14} />
+        </a>
       </motion.nav>
 
-      {/* Mobile Menu Overlay */}
+      {/* ── MOBILE: slim top bar ───────────────────────────────── */}
+      <motion.div
+        initial={{ y: -60, opacity: 0 }}
+        animate={{
+          y:       isScrolled ? 0   : -60,
+          opacity: isScrolled ? 1   : 0,
+        }}
+        transition={{ duration: 0.3 }}
+        className="md:hidden fixed top-3 left-3 right-3 z-50 glass rounded-full px-3 py-2 flex items-center justify-between shadow-lg"
+      >
+        {/* Avatar */}
+        <a
+          href="#hero"
+          className="flex items-center justify-center w-8 h-8 rounded-full overflow-hidden border-2 border-[var(--color-yellow)]/50"
+        >
+          <div className="w-full h-full bg-gradient-to-br from-[var(--color-yellow)]/20 to-[var(--color-purple)]/20 flex items-center justify-center">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" className="text-[var(--color-yellow)]">
+              <circle cx="12" cy="8" r="4" fill="currentColor" opacity="0.8" />
+              <path d="M4 20c0-4.4 3.6-8 8-8s8 3.6 8 8" fill="currentColor" opacity="0.5" />
+            </svg>
+          </div>
+        </a>
+
+        <div className="flex items-center gap-1">
+          <button
+            onClick={(e) => toggleTheme(e)}
+            className="p-2 rounded-full text-[var(--text-secondary)]"
+            aria-label="Toggle theme"
+          >
+            {theme === 'dark' ? <Sun size={15} /> : <Moon size={15} />}
+          </button>
+          <button
+            onClick={() => setMobileOpen(!mobileOpen)}
+            className="p-2 rounded-full text-[var(--text-secondary)]"
+          >
+            {mobileOpen ? <X size={18} /> : <Menu size={18} />}
+          </button>
+        </div>
+      </motion.div>
+
+      {/* ── MOBILE: fullscreen overlay menu ───────────────────── */}
       <AnimatePresence>
         {mobileOpen && (
           <motion.div
@@ -160,7 +199,7 @@ export default function Navigation() {
         )}
       </AnimatePresence>
 
-      {/* Scroll Progress Bar */}
+      {/* ── Scroll progress — moved to left edge ──────────────── */}
       <ScrollProgress />
     </>
   );
@@ -168,7 +207,7 @@ export default function Navigation() {
 
 function ScrollProgress() {
   const [progress, setProgress] = useState(0);
-  const [visible, setVisible] = useState(false);
+  const [visible, setVisible]   = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -182,10 +221,10 @@ function ScrollProgress() {
 
   return (
     <motion.div
-      initial={{ x: 16, opacity: 0 }}
-      animate={{ x: visible ? 0 : 16, opacity: visible ? 1 : 0 }}
+      initial={{ x: -16, opacity: 0 }}
+      animate={{ x: visible ? 0 : -16, opacity: visible ? 1 : 0 }}
       transition={{ duration: 0.3 }}
-      className="fixed right-3 top-1/2 -translate-y-1/2 z-[60] w-[3px] rounded-full overflow-hidden"
+      className="fixed left-3 top-1/2 -translate-y-1/2 z-[60] w-[3px] rounded-full overflow-hidden"
       style={{ height: '40vh', background: 'var(--border-color)' }}
     >
       <motion.div
