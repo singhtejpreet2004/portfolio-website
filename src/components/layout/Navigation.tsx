@@ -168,23 +168,31 @@ export default function Navigation() {
 
 function ScrollProgress() {
   const [progress, setProgress] = useState(0);
+  const [visible, setVisible] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
       const total = document.documentElement.scrollHeight - window.innerHeight;
       setProgress(total > 0 ? (window.scrollY / total) * 100 : 0);
+      setVisible(window.scrollY > 100);
     };
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   return (
-    <div className="fixed top-0 left-0 right-0 z-[60] h-[2px] bg-transparent">
+    <motion.div
+      initial={{ x: 16, opacity: 0 }}
+      animate={{ x: visible ? 0 : 16, opacity: visible ? 1 : 0 }}
+      transition={{ duration: 0.3 }}
+      className="fixed right-3 top-1/2 -translate-y-1/2 z-[60] w-[3px] rounded-full overflow-hidden"
+      style={{ height: '40vh', background: 'var(--border-color)' }}
+    >
       <motion.div
-        className="h-full bg-gradient-to-r from-[var(--color-yellow)] to-[var(--color-cyan)]"
-        style={{ width: `${progress}%` }}
+        className="w-full rounded-full bg-gradient-to-b from-[var(--color-yellow)] to-[var(--color-cyan)]"
+        style={{ height: `${progress}%` }}
         transition={{ duration: 0.1 }}
       />
-    </div>
+    </motion.div>
   );
 }

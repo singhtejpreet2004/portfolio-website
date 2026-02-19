@@ -126,6 +126,8 @@ function StatCard({
         borderColor: isHovered ? `${stat.color}55` : 'var(--border-color)',
         transition: 'border-color 0.2s ease',
         boxShadow: isHovered ? `0 0 24px ${stat.color}18` : 'none',
+        position: 'relative',
+        zIndex: isHovered ? 20 : 1,
       }}
     >
       <div className="flex justify-center mb-3">
@@ -137,7 +139,7 @@ function StatCard({
         </div>
       </div>
       <div className="text-2xl font-bold font-[family-name:var(--font-display)] text-[var(--text-primary)]">
-        <AnimatedCounter target={stat.value} suffix={stat.suffix} />
+        <AnimatedCounter target={stat.value} suffix={stat.suffix} delay={0.9} />
       </div>
       <div className="text-sm text-[var(--text-secondary)] mt-1">{stat.label}</div>
     </motion.div>
@@ -176,14 +178,13 @@ export default function About() {
           transition={{ duration: 0.6 }}
           className="mb-14"
         >
-          <div className="font-[family-name:var(--font-jetbrains)] text-sm mb-3 flex items-center gap-0">
-            <span className="text-[var(--color-cyan)]">portfolio</span>
-            <span className="text-[var(--text-secondary)]">.</span>
-            <span className="text-[var(--color-cyan)]">about</span>
-            <span className="text-[var(--text-secondary)]">.</span>
-            <span className="text-[var(--color-yellow)]">show</span>
-            <span className="text-[var(--text-secondary)]">()</span>
-            <span className="ml-1 text-[var(--color-cyan)] animate-[blink_1s_step-end_infinite]">▋</span>
+          <div
+            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-[family-name:var(--font-jetbrains)] mb-3"
+            style={{ background: 'rgba(0,0,0,0.45)', border: '1px solid var(--border-color)' }}
+          >
+            <span className="text-[var(--color-green)]">&gt;</span>
+            <span className="text-[var(--color-cyan)]">initializing data_engineer.about()</span>
+            <span className="text-[var(--color-cyan)] animate-[blink_1s_step-end_infinite]">_</span>
           </div>
           <h2 className="text-4xl font-bold font-[family-name:var(--font-display)] text-[var(--text-primary)]">
             About Me
@@ -218,7 +219,7 @@ export default function About() {
                 {/* Flipper */}
                 <motion.div
                   animate={{ rotateY: flipped ? 180 : 0 }}
-                  transition={{ duration: 0.55, ease: [0.4, 0, 0.2, 1] }}
+                  transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
                   style={{
                     transformStyle: 'preserve-3d',
                     position: 'relative',
@@ -260,14 +261,6 @@ export default function About() {
                       ))}
                     </div>
 
-                    {/* Coffee emoji stays */}
-                    <motion.div
-                      className="absolute bottom-4 right-4 text-2xl"
-                      animate={{ y: [0, -6, 0] }}
-                      transition={{ duration: 3, repeat: Infinity }}
-                    >
-                      ☕
-                    </motion.div>
                   </div>
 
                   {/* ── BACK: avatar photo ── */}
@@ -285,7 +278,7 @@ export default function About() {
                     <img
                       src="/images/avatar.png"
                       alt="Tejpreet Singh"
-                      className="w-full h-full object-contain object-bottom"
+                      className="w-full h-full object-cover"
                       draggable={false}
                     />
                   </div>
@@ -339,43 +332,29 @@ export default function About() {
             className="lg:col-span-3 space-y-6 text-[var(--text-secondary)] text-lg leading-relaxed"
           >
             <p>
-              Data is chaotic. Infrastructure is harder. I&apos;ve made it my life&apos;s work to
-              make both <em>feel</em> effortless. As a{' '}
-              <strong className="text-[var(--text-primary)]">Data Engineer</strong> with a bias for
-              production-grade reliability, I architect the highways raw data travels on —
+              As a <strong className="text-[var(--text-primary)]">Data Engineer</strong> with a
+              bias for production-grade reliability, I architect the highways raw data travels on —
               Kafka-powered video analytics scaled to{' '}
               <strong className="text-[var(--color-cyan)]">8+ concurrent streams</strong> at
               sub-200ms latency, Spark-orchestrated ETL that eliminated{' '}
               <strong className="text-[var(--color-cyan)]">70% of manual overhead</strong>, and a
               Delta Lakehouse reconciling{' '}
               <strong className="text-[var(--color-cyan)]">20,000+ records</strong> at half the
-              processing time. I don&apos;t just build pipelines; I build <em>guarantees</em>.
+              processing time. I don&apos;t just build pipelines — I build <em>guarantees</em>.
             </p>
 
             <p>
-              Concurrently finishing a{' '}
+              Currently finishing a{' '}
               <strong className="text-[var(--text-primary)]">B.E. in Computer Science</strong> at
-              Chandigarh University and shipping production infrastructure at{' '}
+              Chandigarh University while shipping production infrastructure at{' '}
               <strong className="text-[var(--text-primary)]">
                 Plaksha University&apos;s Dixon IoT Lab
               </strong>
-              . In between:{' '}
+              . Along the way:{' '}
               <strong className="text-[var(--color-yellow)]">three hackathon victories</strong>{' '}
-              (including a ₹1,00,000 grand prize at Hack&apos;Ndore), a{' '}
-              <em>filed patent</em> on automobile safety systems, two peer-reviewed publications, and
-              a certification stack spanning Oracle OCI and IBM Data Science. I&apos;ve been known
-              to push commits between lectures — the pipelines don&apos;t wait for finals week.
-            </p>
-
-            <p>
-              Beyond the terminal, I coordinate IEEE events, lead student research initiatives, and
-              — somewhat paradoxically — write poetry and read religious history. The same instinct
-              that structures a distributed DAG also structures a couplet: both demand{' '}
-              <em>precision</em>, both reward <em>patience</em>, and both{' '}
-              <strong className="text-[var(--text-primary)]">
-                crash spectacularly when you ignore the edge cases
-              </strong>
-              .
+              (including a ₹1,00,000 grand prize), a <em>filed patent</em> on automobile safety
+              systems, two peer-reviewed publications, and certifications spanning Oracle OCI and IBM
+              Data Science.
             </p>
           </motion.div>
         </div>
