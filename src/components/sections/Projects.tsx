@@ -58,10 +58,11 @@ export default function Projects() {
         {/* Featured Project */}
         {featured && filter === 'All' && (
           <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
+            initial={{ opacity: 0, rotateX: 20, y: 50 }}
+            whileInView={{ opacity: 1, rotateX: 0, y: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
+            transition={{ duration: 0.9, type: 'spring', stiffness: 120, damping: 20 }}
+            style={{ perspective: 1200, transformOrigin: 'top center' }}
             whileHover={{ y: -4 }}
             onClick={() => setSelectedProject(featured.id)}
             className="mb-10 p-6 md:p-8 rounded-2xl bg-gradient-to-br from-[var(--bg-card)] to-[var(--color-purple)]/5 border border-[var(--color-purple)]/20 cursor-pointer group hover:border-[var(--color-purple)]/40 transition-all duration-300"
@@ -200,10 +201,11 @@ function ProjectCard({
 }) {
   return (
     <motion.div
-      initial={{ opacity: 0, y: 30 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      transition={{ delay: index * 0.1 }}
+      initial={{ opacity: 0, rotateX: 45, scale: 0.8, y: 40 }}
+      whileInView={{ opacity: 1, rotateX: 0, scale: 1, y: 0 }}
+      viewport={{ once: true, margin: '-60px' }}
+      transition={{ delay: index * 0.12, duration: 0.7, type: 'spring', stiffness: 180, damping: 20 }}
+      style={{ transformOrigin: 'center bottom', perspective: 800 }}
       whileHover={{ y: -6 }}
       onClick={onClick}
       className="group p-6 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] hover:border-[var(--color-cyan)]/30 cursor-pointer transition-all duration-300 hover:shadow-[var(--shadow-glow-cyan)]"

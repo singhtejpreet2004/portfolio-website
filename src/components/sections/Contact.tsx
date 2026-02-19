@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, FormEvent } from 'react';
-import { motion } from 'framer-motion';
+import { useState, FormEvent, useRef } from 'react';
+import { motion, useScroll, useTransform } from 'framer-motion';
 import {
   Send,
   Github,
@@ -30,6 +30,15 @@ export default function Contact() {
     subject: '',
     message: '',
   });
+  const sectionRef = useRef<HTMLElement>(null);
+
+  // Scroll-driven spring rise
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ['start end', 'start 0.4'],
+  });
+  const sectionY = useTransform(scrollYProgress, [0, 1], [80, 0]);
+  const sectionOpacity = useTransform(scrollYProgress, [0, 0.3], [0, 1]);
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
@@ -42,13 +51,16 @@ export default function Contact() {
   };
 
   return (
-    <section id="contact" className="relative py-24 md:py-32">
+    <section id="contact" ref={sectionRef} className="relative py-24 md:py-32">
       <div
         className="absolute top-1/3 left-1/4 w-96 h-96 opacity-10 blur-3xl pointer-events-none"
         style={{ background: 'radial-gradient(circle, var(--color-purple) 0%, transparent 70%)' }}
       />
 
-      <div className="max-w-6xl mx-auto px-6">
+      <motion.div
+        className="max-w-6xl mx-auto px-6"
+        style={{ y: sectionY, opacity: sectionOpacity, willChange: 'transform, opacity' }}
+      >
         <SectionHeading
           subtitle='// POST /api/contact { message: "Let&apos;s build something" }'
           title="Let's Connect"
@@ -57,12 +69,7 @@ export default function Contact() {
 
         <div className="grid lg:grid-cols-2 gap-10 mt-12">
           {/* Left - Terminal Contact Form */}
-          <motion.div
-            initial={{ opacity: 0, x: -30 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-          >
+          <div>
             <div className="rounded-2xl overflow-hidden border border-[var(--border-color)] shadow-xl">
               {/* Terminal Header */}
               <div className="flex items-center gap-2 px-4 py-3 bg-[var(--bg-hover)]">
@@ -172,16 +179,10 @@ export default function Contact() {
                 </motion.button>
               </form>
             </div>
-          </motion.div>
+          </div>
 
           {/* Right - Social Links & Info */}
-          <motion.div
-            initial={{ opacity: 0, x: 30 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            className="space-y-4"
-          >
+          <div className="space-y-4">
             <p className="text-[var(--text-secondary)] text-lg leading-relaxed mb-8">
               Whether you&apos;re looking for a data engineer to join your team, want to collaborate
               on an exciting project, or just want to geek out about Kafka — I&apos;d love to hear
@@ -246,9 +247,9 @@ export default function Contact() {
                 Open to opportunities
               </span>
             </motion.div>
-          </motion.div>
+          </div>
         </div>
-      </div>
+      </motion.div>
     </section>
   );
 }
