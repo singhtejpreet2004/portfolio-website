@@ -38,7 +38,6 @@ export default function Contact() {
     offset: ['start end', 'start 0.4'],
   });
   const sectionY = useTransform(scrollYProgress, [0, 1], [80, 0]);
-  const sectionOpacity = useTransform(scrollYProgress, [0, 0.3], [0, 1]);
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
@@ -59,7 +58,7 @@ export default function Contact() {
 
       <motion.div
         className="max-w-6xl mx-auto px-6"
-        style={{ y: sectionY, opacity: sectionOpacity, willChange: 'transform, opacity' }}
+        style={{ y: sectionY, willChange: 'transform' }}
       >
         <SectionHeading
           subtitle='// POST /api/contact { message: "Let&apos;s build something" }'

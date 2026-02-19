@@ -162,7 +162,6 @@ export default function About() {
     offset: ['start end', 'start 0.25'],
   });
   const sectionSlideX = useTransform(scrollYProgress, [0, 1], [120, 0]);
-  const sectionFadeIn  = useTransform(scrollYProgress, [0, 0.4], [0, 1]);
 
   // Mouse parallax depth layers
   const { springX, springY } = useMouseContext();
@@ -221,7 +220,7 @@ export default function About() {
         {/* Scroll-driven entrance: whole grid slides in from right */}
         <motion.div
           className="grid lg:grid-cols-5 gap-12 items-start"
-          style={{ x: sectionSlideX, opacity: sectionFadeIn, willChange: 'transform, opacity' }}
+          style={{ x: sectionSlideX, willChange: 'transform' }}
         >
 
           {/* Left — flip card + floating tech badges (mouse parallax layer 2) */}
