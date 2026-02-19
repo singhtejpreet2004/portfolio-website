@@ -26,6 +26,15 @@ export default function Navigation() {
   const [mobileOpen, setMobileOpen]       = useState(false);
   const { theme, toggleTheme } = useTheme();
 
+  const isDark = theme === 'dark';
+  // Accent class bundles — yellow in dark, cyan in light
+  const aText  = isDark ? 'text-[var(--color-yellow)]'                                                 : 'text-[var(--color-cyan)]';
+  const aBorder= isDark ? 'border-[var(--color-yellow)]/50 hover:border-[var(--color-yellow)] hover:bg-[var(--color-yellow)]/10' : 'border-[var(--color-cyan)]/50 hover:border-[var(--color-cyan)] hover:bg-[var(--color-cyan)]/10';
+  const aActive= isDark ? 'bg-[var(--color-yellow)]/10 border border-[var(--color-yellow)]/20'         : 'bg-[var(--color-cyan)]/10 border border-[var(--color-cyan)]/20';
+  const aBg    = isDark ? 'bg-[var(--color-yellow)]'                                                   : 'bg-[var(--color-cyan)]';
+  const aBgText= isDark ? 'text-[var(--color-text-dark)]'                                              : 'text-white';
+  const aGlow  = isDark ? 'hover:shadow-[var(--shadow-glow-yellow)]'                                   : 'hover:shadow-[var(--shadow-glow-cyan)]';
+
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 100);
@@ -62,7 +71,7 @@ export default function Navigation() {
         {/* Star — top of dock, links back to hero */}
         <a
           href="#hero"
-          className="flex items-center justify-center w-9 h-9 rounded-full border-2 border-[var(--color-yellow)]/50 hover:border-[var(--color-yellow)] hover:bg-[var(--color-yellow)]/10 transition-all mb-1 text-[var(--color-yellow)]"
+          className={`flex items-center justify-center w-9 h-9 rounded-full border-2 transition-all mb-1 ${aBorder} ${aText}`}
           title="Home"
         >
           <Star size={16} fill="currentColor" />
@@ -82,14 +91,14 @@ export default function Navigation() {
               title={item.label}
               className={`relative flex items-center justify-center w-9 h-9 rounded-full transition-colors duration-200 ${
                 isActive
-                  ? 'text-[var(--color-yellow)]'
+                  ? aText
                   : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
               }`}
             >
               {isActive && (
                 <motion.div
                   layoutId="activeNav"
-                  className="absolute inset-0 rounded-full bg-[var(--color-yellow)]/10 border border-[var(--color-yellow)]/20"
+                  className={`absolute inset-0 rounded-full ${aActive}`}
                   transition={{ type: 'spring', stiffness: 400, damping: 30 }}
                 />
               )}
@@ -113,7 +122,7 @@ export default function Navigation() {
         {/* Resume — icon only in dock */}
         <a
           href="/resume.pdf"
-          className="flex items-center justify-center w-8 h-8 rounded-full bg-[var(--color-yellow)] text-[var(--color-text-dark)] hover:shadow-[var(--shadow-glow-yellow)] transition-all mt-0.5"
+          className={`flex items-center justify-center w-8 h-8 rounded-full ${aBg} ${aBgText} ${aGlow} transition-all mt-0.5`}
           title="Download Resume"
           download
         >
@@ -134,7 +143,7 @@ export default function Navigation() {
         {/* Star — home */}
         <a
           href="#hero"
-          className="flex items-center justify-center w-8 h-8 rounded-full border-2 border-[var(--color-yellow)]/50 text-[var(--color-yellow)]"
+          className={`flex items-center justify-center w-8 h-8 rounded-full border-2 ${aBorder} ${aText}`}
         >
           <Star size={14} fill="currentColor" />
         </a>
@@ -179,14 +188,14 @@ export default function Navigation() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: i * 0.05 }}
                   onClick={() => setMobileOpen(false)}
-                  className="text-2xl font-[family-name:var(--font-display)] font-bold text-[var(--text-primary)] hover:text-[var(--color-yellow)] transition-colors"
+                  className="text-2xl font-[family-name:var(--font-display)] font-bold text-[var(--text-primary)] hover:text-[var(--color-cyan)] transition-colors"
                 >
                   {item.label}
                 </motion.a>
               ))}
               <a
                 href="/resume.pdf"
-                className="mt-4 px-6 py-3 rounded-full bg-[var(--color-yellow)] text-[var(--color-text-dark)] font-medium"
+                className={`mt-4 px-6 py-3 rounded-full font-medium ${aBg} ${aBgText}`}
               >
                 Download Resume
               </a>
@@ -224,8 +233,8 @@ function ScrollProgress() {
       style={{ height: '40vh', background: 'var(--border-color)' }}
     >
       <motion.div
-        className="w-full rounded-full bg-gradient-to-b from-[var(--color-yellow)] to-[var(--color-cyan)]"
-        style={{ height: `${progress}%` }}
+        className="w-full rounded-full"
+        style={{ height: `${progress}%`, background: 'var(--nav-accent)' }}
         transition={{ duration: 0.1 }}
       />
     </motion.div>

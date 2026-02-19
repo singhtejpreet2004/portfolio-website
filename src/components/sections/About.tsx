@@ -60,37 +60,37 @@ function getCardProps(idx: number, hovered: number | null) {
 
 const codeLines = [
   { delay: 0.3,  jsx: (
-    <><span className="text-[var(--color-cyan)]">class</span>{' '}
-    <span className="text-[var(--color-yellow)]">DataEngineer</span>:</>
+    <><span className="text-[var(--code-keyword)]">class</span>{' '}
+    <span className="text-[var(--code-fn)]">DataEngineer</span>:</>
   )},
   { delay: 0.5,  jsx: (
-    <span className="ml-4"><span className="text-[var(--color-cyan)]">def</span>{' '}
-    <span className="text-[var(--color-yellow)]">__init__</span>
+    <span className="ml-4"><span className="text-[var(--code-keyword)]">def</span>{' '}
+    <span className="text-[var(--code-fn)]">__init__</span>
     <span className="text-[var(--text-secondary)]">(self):</span></span>
   )},
   { delay: 0.7,  jsx: (
     <span className="ml-8 text-[var(--text-secondary)]">
-      self.name = <span className="text-[var(--color-green)]">&quot;Tejpreet&quot;</span>
+      self.name = <span className="text-[var(--code-string)]">&quot;Tejpreet&quot;</span>
     </span>
   )},
   { delay: 0.9,  jsx: (
     <span className="ml-8 text-[var(--text-secondary)]">
-      self.passion = <span className="text-[var(--color-green)]">&quot;Pipelines&quot;</span>
+      self.passion = <span className="text-[var(--code-string)]">&quot;Pipelines&quot;</span>
     </span>
   )},
   { delay: 1.1,  jsx: (
     <span className="ml-8 text-[var(--text-secondary)]">
-      self.coffee = <span className="text-[var(--color-yellow)]">float</span>(<span className="text-[var(--color-green)]">&quot;inf&quot;</span>)
+      self.coffee = <span className="text-[var(--code-fn)]">float</span>(<span className="text-[var(--code-string)]">&quot;inf&quot;</span>)
     </span>
   )},
   { delay: 1.3,  jsx: (
-    <span className="ml-4"><span className="text-[var(--color-cyan)]">def</span>{' '}
-    <span className="text-[var(--color-yellow)]">build</span>
+    <span className="ml-4"><span className="text-[var(--code-keyword)]">def</span>{' '}
+    <span className="text-[var(--code-fn)]">build</span>
     <span className="text-[var(--text-secondary)]">(self, chaos):</span></span>
   )},
   { delay: 1.5,  jsx: (
     <span className="ml-8 text-[var(--text-secondary)]">
-      <span className="text-[var(--color-cyan)]">return</span> Pipeline(chaos).
+      <span className="text-[var(--code-keyword)]">return</span> Pipeline(chaos).
     </span>
   )},
   { delay: 1.7,  jsx: (
@@ -201,7 +201,7 @@ export default function About() {
         >
           <div
             className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-[family-name:var(--font-jetbrains)] mb-3"
-            style={{ background: 'rgba(0,0,0,0.45)', border: '1px solid var(--border-color)' }}
+            style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)' }}
           >
             <span className="text-[var(--color-green)]">&gt;</span>
             <span className="text-[var(--color-cyan)]">initializing data_engineer.about()</span>

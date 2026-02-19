@@ -3,7 +3,8 @@
 import { useState, useRef, useEffect, type ReactNode } from 'react';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import SectionHeading from '@/components/ui/SectionHeading';
-import { skillCategories } from '@/data/skills';
+import { skillCategories, miscellaneousSkills } from '@/data/skills';
+import { useTheme } from '@/components/providers/ThemeProvider';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 type LT = 'cmd' | 'out' | 'err' | 'info' | 'ok' | 'dim' | 'blank' | 'rich';
@@ -18,10 +19,15 @@ const CAT_COLOR: Record<string, string> = {
   'Monitoring & Tools': '#FF8080',
 };
 
-// All skills sorted by proficiency desc
+// Main skills (shown in tree) sorted by proficiency desc
 const ALL = skillCategories
   .flatMap((c) => c.skills.map((s) => ({ ...s, catName: c.name, color: CAT_COLOR[c.name] ?? '#fff' })))
   .sort((a, b) => b.proficiency - a.proficiency);
+
+// Miscellaneous skills — shown in `skills` command but NOT in `tree`
+const MISC_COLOR = '#8B8FA8';
+const MISC = miscellaneousSkills.map((s) => ({ ...s, catName: 'Miscellaneous', color: MISC_COLOR }));
+const ALL_SKILLS = [...ALL, ...MISC];
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 function bar(pct: number, w = 16) {
@@ -43,10 +49,10 @@ function jskillRow(skill: (typeof ALL)[0]): ReactNode {
   return (
     <div className="whitespace-pre text-sm leading-relaxed flex items-baseline">
       <span style={{ color: skill.color }}>{pad(skill.name, 22)}</span>
-      <span className="text-[var(--text-secondary)]">{pad(skill.catName, 22)}</span>
+      <span className="text-[var(--terminal-muted)]">{pad(skill.catName, 22)}</span>
       <span style={{ color: skill.color }}>{bar(skill.proficiency)}</span>
-      <span className="text-[var(--text-primary)]">{' ' + skill.proficiency + '%'}</span>
-      <span className="text-[var(--text-secondary)] opacity-60">{' · ' + skill.yearsOfExperience + 'yr'}</span>
+      <span className="text-[var(--terminal-text)]">{' ' + skill.proficiency + '%'}</span>
+      <span className="text-[var(--terminal-muted)] opacity-60">{' · ' + skill.yearsOfExperience + 'yr'}</span>
     </div>
   );
 }
@@ -55,9 +61,9 @@ function jcatTree(chars: string, cat: (typeof skillCategories)[0]): ReactNode {
   const color = CAT_COLOR[cat.name] ?? '#fff';
   return (
     <div className="whitespace-pre text-sm leading-relaxed flex items-baseline">
-      <span className="text-[var(--text-secondary)]">{chars}</span>
+      <span className="text-[var(--terminal-muted)]">{chars}</span>
       <span style={{ color }} className="font-semibold">{pad(catSlug(cat.name) + '/', 28)}</span>
-      <span className="text-[var(--text-secondary)] opacity-50">{'[avg: ' + catAvg(cat.name) + '%  · ' + cat.skills.length + ' files]'}</span>
+      <span className="text-[var(--terminal-muted)] opacity-50">{'[avg: ' + catAvg(cat.name) + '%  · ' + cat.skills.length + ' files]'}</span>
     </div>
   );
 }
@@ -66,12 +72,12 @@ function jskillTree(chars: string, skill: (typeof ALL)[0]): ReactNode {
   const s = slug(skill.name);
   return (
     <div className="whitespace-pre text-sm leading-relaxed flex items-baseline">
-      <span className="text-[var(--text-secondary)]">{chars}</span>
+      <span className="text-[var(--terminal-muted)]">{chars}</span>
       <span style={{ color: skill.color }}>{pad(s, 26)}</span>
-      <span className="text-[var(--text-secondary)]">{'.skill  '}</span>
+      <span className="text-[var(--terminal-muted)]">{'.skill  '}</span>
       <span style={{ color: skill.color }}>{bar(skill.proficiency)}</span>
-      <span className="text-[var(--text-secondary)]">{' ' + skill.proficiency + '%'}</span>
-      <span className="text-[var(--text-secondary)] opacity-50">{' · ' + skill.yearsOfExperience + 'yr'}</span>
+      <span className="text-[var(--terminal-muted)]">{' ' + skill.proficiency + '%'}</span>
+      <span className="text-[var(--terminal-muted)] opacity-50">{' · ' + skill.yearsOfExperience + 'yr'}</span>
     </div>
   );
 }
@@ -88,9 +94,9 @@ function jmount(cat: (typeof skillCategories)[0]): ReactNode {
   return (
     <div className="whitespace-pre text-sm leading-relaxed flex items-baseline">
       <span className="text-[var(--color-green)]">  ✓ </span>
-      <span className="text-[var(--text-secondary)]">Mounted  </span>
+      <span className="text-[var(--terminal-muted)]">Mounted  </span>
       <span style={{ color }}>{catSlug(cat.name) + '/'}</span>
-      <span className="text-[var(--text-secondary)]">{'   [' + cat.skills.length + ' skills]'}</span>
+      <span className="text-[var(--terminal-muted)]">{'   [' + cat.skills.length + ' skills]'}</span>
     </div>
   );
 }
@@ -99,10 +105,10 @@ function jcatDetail(label: string, val: string, valColor?: string): ReactNode {
   return (
     <div className="whitespace-pre text-sm leading-relaxed flex items-baseline">
       <span className="text-[var(--color-cyan)]">{'  ' + pad(label, 14)}</span>
-      <span className="text-[var(--text-secondary)]">: </span>
+      <span className="text-[var(--terminal-muted)]">: </span>
       {valColor
         ? <span style={{ color: valColor }}>{val}</span>
-        : <span className="text-[var(--text-primary)]">{val}</span>}
+        : <span className="text-[var(--terminal-text)]">{val}</span>}
     </div>
   );
 }
@@ -126,7 +132,7 @@ function cmdTree(catFilter?: string): Line[] {
   const label = catFilter
     ? `~/skills/${catSlug(cats[0].name)}`
     : `~/skills  (${ALL.length} skills · ${skillCategories.length} categories)`;
-  out.push(mkLine('rich', '', <div className="whitespace-pre text-sm leading-relaxed font-semibold text-[var(--text-primary)]">{label}</div>));
+  out.push(mkLine('rich', '', <div className="whitespace-pre text-sm leading-relaxed font-semibold text-[var(--terminal-text)]">{label}</div>));
 
   cats.forEach((cat, ci) => {
     const lastCat = ci === cats.length - 1;
@@ -146,7 +152,7 @@ function cmdTree(catFilter?: string): Line[] {
   });
 
   out.push(mkLine('blank', ''));
-  out.push(mkLine('dim', `  ${ALL.length} .skill files`));
+  out.push(mkLine('dim', `  ${ALL.length} .skill files  (+${MISC.length} misc — run 'skills' to see all)`));
   out.push(mkLine('blank', ''));
   return out;
 }
@@ -183,7 +189,7 @@ function cmdLs(catFilter?: string): Line[] {
 
 function cmdCat(query: string): Line[] {
   const q = query.toLowerCase().replace(/\.skill$/, '').replace(/-/g, ' ').trim();
-  const skill = ALL.find(
+  const skill = ALL_SKILLS.find(
     (s) => s.name.toLowerCase().includes(q) || slug(s.name).replace(/-/g, ' ').includes(q)
   );
   if (!skill) return [
@@ -196,9 +202,9 @@ function cmdCat(query: string): Line[] {
   return [
     mkLine('rich', '', (
       <div className="whitespace-pre text-sm leading-relaxed">
-        <span className="text-[var(--text-secondary)]">{'─── '}</span>
+        <span className="text-[var(--terminal-muted)]">{'─── '}</span>
         <span style={{ color }}>{s + '.skill'}</span>
-        <span className="text-[var(--text-secondary)]">{' ' + '─'.repeat(Math.max(0, 46 - s.length))}</span>
+        <span className="text-[var(--terminal-muted)]">{' ' + '─'.repeat(Math.max(0, 46 - s.length))}</span>
       </div>
     )),
     mkLine('rich', '', jcatDetail('name',        skill.name,          color)),
@@ -206,9 +212,9 @@ function cmdCat(query: string): Line[] {
     mkLine('rich', '', (
       <div className="whitespace-pre text-sm leading-relaxed flex items-baseline">
         <span className="text-[var(--color-cyan)]">{'  ' + pad('proficiency', 14)}</span>
-        <span className="text-[var(--text-secondary)]">: </span>
+        <span className="text-[var(--terminal-muted)]">: </span>
         <span style={{ color }}>{bar(skill.proficiency)}</span>
-        <span className="text-[var(--text-primary)]">{' ' + skill.proficiency + '%'}</span>
+        <span className="text-[var(--terminal-text)]">{' ' + skill.proficiency + '%'}</span>
       </div>
     )),
     mkLine('rich', '', jcatDetail('experience',  skill.yearsOfExperience + (skill.yearsOfExperience === 1 ? ' year' : ' years'))),
@@ -218,18 +224,18 @@ function cmdCat(query: string): Line[] {
 }
 
 function cmdSkills(catFilter?: string): Line[] {
-  let skills = ALL;
+  let skills = ALL_SKILLS;
   if (catFilter) {
     const q = catFilter.toLowerCase().replace(/-/g, ' ');
-    skills = ALL.filter((s) => s.catName.toLowerCase().includes(q));
+    skills = ALL_SKILLS.filter((s) => s.catName.toLowerCase().includes(q));
     if (!skills.length) return [
       mkLine('err', `  No skills matching '${catFilter}'`),
-      mkLine('dim', '  Try: languages · data-engineering · infrastructure · databases · monitoring-tools'),
+      mkLine('dim', '  Try: languages · data-engineering · infrastructure · databases · monitoring-tools · miscellaneous'),
       mkLine('blank', ''),
     ];
   }
   const hdr = (
-    <div className="whitespace-pre text-sm leading-relaxed text-[var(--text-secondary)]">
+    <div className="whitespace-pre text-sm leading-relaxed text-[var(--terminal-muted)]">
       {'  ' + pad('Skill', 22) + pad('Category', 22) + 'Proficiency'}
     </div>
   );
@@ -260,13 +266,13 @@ function cmdSelect(): Line[] {
     mkLine('dim', sp),
     ...top.map((s) => mkLine('rich', '', (
       <div key={s.name} className="whitespace-pre text-sm leading-relaxed">
-        <span className="text-[var(--text-secondary)]">{'  │'}</span>
+        <span className="text-[var(--terminal-muted)]">{'  │'}</span>
         <span style={{ color: s.color }}>{pad(' ' + s.name, NW)}</span>
-        <span className="text-[var(--text-secondary)]">{'│'}</span>
+        <span className="text-[var(--terminal-muted)]">{'│'}</span>
         <span style={{ color: s.color }}>{pad(' ' + s.catName, CW)}</span>
-        <span className="text-[var(--text-secondary)]">{'│'}</span>
-        <span className="text-[var(--text-primary)]">{pad(' ' + s.proficiency + '%', PW)}</span>
-        <span className="text-[var(--text-secondary)]">{'│'}</span>
+        <span className="text-[var(--terminal-muted)]">{'│'}</span>
+        <span className="text-[var(--terminal-text)]">{pad(' ' + s.proficiency + '%', PW)}</span>
+        <span className="text-[var(--terminal-muted)]">{'│'}</span>
       </div>
     ))),
     mkLine('dim', bl),
@@ -316,7 +322,7 @@ function DinoGame({ onQuit }: { onQuit: () => void }) {
     function doJump() {
       if (g.dead) { resetGame(); return; }
       if (!g.started) g.started = true;
-      if (!g.jumping) { g.dinoVY = -11; g.jumping = true; }
+      if (!g.jumping) { g.dinoVY = 11; g.jumping = true; }
     }
 
     const onKey = (e: KeyboardEvent) => {
@@ -360,10 +366,10 @@ function DinoGame({ onQuit }: { onQuit: () => void }) {
         ctx.font = '11px "JetBrains Mono", monospace';
         ctx.fillText('SPACE or click to restart', W / 2, H / 2 + 12);
       } else {
-        // Physics
+        // Physics — dinoY is height above ground (positive = up), gravity pulls down
         g.dinoY += g.dinoVY * dt;
-        g.dinoVY += 0.6 * dt;
-        if (g.dinoY >= 0) { g.dinoY = 0; g.dinoVY = 0; g.jumping = false; }
+        g.dinoVY -= 0.6 * dt;
+        if (g.dinoY <= 0) { g.dinoY = 0; g.dinoVY = 0; g.jumping = false; }
 
         // Spawn obstacles
         g.lastSpawn += dt * 16.67;
@@ -432,12 +438,201 @@ function DinoGame({ onQuit }: { onQuit: () => void }) {
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
-    <div className="border-t border-[rgba(48,54,61,0.9)]">
+    <div className="border-t border-[var(--terminal-border)]">
       <div className="px-5 pt-2 pb-1 flex items-center justify-between text-[11px] font-[family-name:var(--font-jetbrains)]">
         <span className="text-[var(--color-green)]">◆ DINO.EXE</span>
-        <span className="text-[var(--text-secondary)]">SPACE / click = jump · ESC = exit</span>
+        <span className="text-[var(--terminal-muted)]">SPACE / click = jump · ESC = exit</span>
       </div>
       <canvas ref={canvasRef} className="w-full block" height={130} style={{ display: 'block' }} />
+    </div>
+  );
+}
+
+// ── htop dashboard ────────────────────────────────────────────────────────────
+function HtopView({ onQuit }: { onQuit: () => void }) {
+  const onQuitRef = useRef(onQuit);
+  useEffect(() => { onQuitRef.current = onQuit; }, [onQuit]);
+
+  const [liveProfs, setLiveProfs] = useState<number[]>(() => ALL_SKILLS.map((s) => s.proficiency));
+  const [history,   setHistory]   = useState<number[]>(() => {
+    const base = Math.round(ALL_SKILLS.reduce((a, s) => a + s.proficiency, 0) / ALL_SKILLS.length);
+    return Array.from({ length: 24 }, () => Math.round(base + (Math.random() - 0.5) * 6));
+  });
+  const [clock,  setClock]  = useState(() => new Date().toLocaleTimeString());
+  const [uptime, setUptime] = useState(0);
+
+  useEffect(() => {
+    const id = setInterval(() => {
+      const next = ALL_SKILLS.map((s) =>
+        Math.min(100, Math.max(s.proficiency - 4, s.proficiency + Math.round((Math.random() - 0.5) * 5)))
+      );
+      const avg = Math.round(next.reduce((a, v) => a + v, 0) / next.length);
+      setLiveProfs(next);
+      setHistory((prev) => [...prev.slice(1), avg]);
+      setClock(new Date().toLocaleTimeString());
+      setUptime((u) => u + 1);
+    }, 1200);
+    return () => clearInterval(id);
+  }, []);
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'q' || e.key === 'Q' || e.key === 'Escape') onQuitRef.current();
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, []);
+
+  const avgProf = Math.round(liveProfs.reduce((a, v) => a + v, 0) / liveProfs.length);
+
+  function catLiveAvg(catName: string) {
+    const vals = ALL_SKILLS.map((s, i) => (s.catName === catName ? liveProfs[i] : null)).filter((v): v is number => v !== null);
+    return Math.round(vals.reduce((a, v) => a + v, 0) / vals.length);
+  }
+
+  function renderBar(pct: number, w: number, color: string): ReactNode {
+    const f = Math.round((pct / 100) * w);
+    return (
+      <>
+        <span style={{ color }}>{'█'.repeat(f)}</span>
+        <span style={{ color: 'var(--terminal-muted)', opacity: 0.3 }}>{'░'.repeat(w - f)}</span>
+      </>
+    );
+  }
+
+  function sparkline(vals: number[]): ReactNode {
+    const blocks = ['▁','▂','▃','▄','▅','▆','▇','█'];
+    const min = Math.min(...vals), max = Math.max(...vals), range = max - min || 1;
+    return (
+      <>
+        {vals.map((v, i) => {
+          const bi = Math.min(blocks.length - 1, Math.floor(((v - min) / range) * blocks.length));
+          return <span key={i} style={{ color: 'var(--color-cyan)', opacity: 0.5 + (bi / blocks.length) * 0.5 }}>{blocks[bi]}</span>;
+        })}
+      </>
+    );
+  }
+
+  return (
+    <div
+      className="border-t border-[var(--terminal-border)] font-[family-name:var(--font-jetbrains)] select-none"
+      style={{ background: 'var(--terminal-bg)', fontSize: 11 }}
+    >
+      {/* ── Header bar ── */}
+      <div
+        className="flex items-center justify-between px-4 py-2 border-b border-[var(--terminal-border)]"
+        style={{ background: 'var(--terminal-titlebar)' }}
+      >
+        <span className="font-bold tracking-wide" style={{ color: 'var(--color-cyan)' }}>
+          ⬡ skills-htop
+        </span>
+        <div className="flex items-center gap-5" style={{ color: 'var(--terminal-muted)', fontSize: 10 }}>
+          <span>skills&nbsp;<span style={{ color: 'var(--color-green)', fontWeight: 700 }}>{ALL_SKILLS.length}</span></span>
+          <span>categories&nbsp;<span style={{ color: 'var(--color-yellow)', fontWeight: 700 }}>{skillCategories.length}</span></span>
+          <span>avg&nbsp;<span style={{ color: 'var(--color-cyan)', fontWeight: 700 }}>{avgProf}%</span></span>
+          <span>up&nbsp;{uptime}s</span>
+          <span style={{ color: 'var(--terminal-text)' }}>{clock}</span>
+        </div>
+      </div>
+
+      {/* ── Category meters ── */}
+      <div className="px-4 pt-3 pb-3 border-b border-[var(--terminal-border)] grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-1.5">
+        {skillCategories.map((cat) => {
+          const color = CAT_COLOR[cat.name] ?? '#fff';
+          const live  = catLiveAvg(cat.name);
+          return (
+            <div key={cat.name} className="flex items-center gap-2">
+              <span style={{ color, minWidth: 96, fontSize: 10, fontWeight: 600 }}>
+                {catSlug(cat.name).slice(0, 14)}
+              </span>
+              <span style={{ color: 'var(--terminal-muted)' }}>[</span>
+              {renderBar(live, 20, color)}
+              <span style={{ color: 'var(--terminal-muted)' }}>]</span>
+              <span style={{ color, minWidth: 38, fontWeight: 700 }}>{live}%</span>
+              <span style={{ color: 'var(--terminal-muted)', fontSize: 10 }}>{cat.skills.length}&nbsp;skills</span>
+            </div>
+          );
+        })}
+
+        {/* Sparkline history */}
+        <div className="flex items-center gap-2">
+          <span style={{ color: 'var(--terminal-muted)', minWidth: 96, fontSize: 10, fontWeight: 600 }}>
+            avg&nbsp;history
+          </span>
+          <span style={{ color: 'var(--terminal-muted)' }}>[</span>
+          {sparkline(history)}
+          <span style={{ color: 'var(--terminal-muted)' }}>]</span>
+          <span style={{ color: 'var(--color-cyan)', minWidth: 38, fontWeight: 700 }}>{history[history.length - 1]}%</span>
+        </div>
+      </div>
+
+      {/* ── Skills table ── */}
+      <div className="overflow-y-auto" style={{ maxHeight: 320 }} data-lenis-prevent>
+        {/* Column headers */}
+        <div
+          className="sticky top-0 px-4 py-1 flex items-center gap-2 border-b border-[var(--terminal-border)]"
+          style={{ background: 'var(--terminal-titlebar)', color: 'var(--terminal-muted)', fontSize: 10, fontWeight: 600 }}
+        >
+          <span style={{ width: 28 }}>PID</span>
+          <span style={{ flex: '1 1 120px' }}>SKILL</span>
+          <span style={{ width: 38 }}>PROF</span>
+          <span style={{ width: 30 }}>EXP</span>
+          <span style={{ flex: '1 1 100px' }}>CATEGORY</span>
+          <span style={{ width: 128 }}>USAGE</span>
+        </div>
+
+        {ALL_SKILLS.map((skill, i) => {
+          const lv = liveProfs[i] ?? skill.proficiency;
+          return (
+            <div
+              key={skill.name}
+              className="px-4 flex items-center gap-2 transition-opacity"
+              style={{
+                paddingTop: 3,
+                paddingBottom: 3,
+                borderBottom: '1px solid var(--terminal-border)',
+                opacity: 0.93,
+              }}
+            >
+              <span style={{ color: 'var(--terminal-muted)', width: 28, fontSize: 10 }}>
+                {String(i + 1).padStart(3, '0')}
+              </span>
+              <span style={{ color: skill.color, flex: '1 1 120px', fontWeight: 600 }} className="truncate">
+                {skill.name}
+              </span>
+              <span style={{ color: skill.color, width: 38, fontWeight: 700 }}>{lv}%</span>
+              <span style={{ color: 'var(--terminal-muted)', width: 30, fontSize: 10 }}>{skill.yearsOfExperience}yr</span>
+              <span style={{ color: 'var(--terminal-muted)', flex: '1 1 100px', fontSize: 10 }} className="truncate">
+                {skill.catName}
+              </span>
+              <span style={{ width: 128 }}>{renderBar(lv, 14, skill.color)}</span>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* ── Footer key hints ── */}
+      <div
+        className="flex items-center gap-4 px-4 py-1.5 border-t border-[var(--terminal-border)]"
+        style={{ background: 'var(--terminal-titlebar)', color: 'var(--terminal-muted)', fontSize: 10 }}
+      >
+        {(['q', 'ESC'] as const).map((k) => (
+          <span key={k}>
+            <span
+              className="px-1 rounded-sm text-white mr-1"
+              style={{ background: 'var(--color-cyan)', fontSize: 9 }}
+            >
+              {k}
+            </span>
+            {k === 'q' ? 'Quit' : 'Exit'}
+          </span>
+        ))}
+        <span>
+          <span className="px-1 rounded-sm text-white mr-1" style={{ background: 'var(--color-cyan)', fontSize: 9 }}>↑↓</span>
+          Scroll
+        </span>
+        <span className="ml-auto opacity-50">skills-htop v1.0.0</span>
+      </div>
     </div>
   );
 }
@@ -449,13 +644,13 @@ function buildBoot(): Line[] {
   return [
     mk('info', '  ╔══════════════════════════════════════════════╗'),
     mk('info', '  ║          SKILLS TERMINAL  ·  v1.0.0          ║'),
-    mk('info', '  ║     25 skills  ·  5 categories  ·  4 yrs     ║'),
+    mk('info', '  ║   25 skills  ·  5 categories  ·  +7 misc     ║'),
     mk('info', '  ╚══════════════════════════════════════════════╝'),
     mk('blank', ''),
     mk('dim', '  Mounting skill filesystem...'),
     ...skillCategories.map((c) => mk('rich', '', jmount(c))),
     mk('blank', ''),
-    mk('ok', '  25 skills loaded.'),
+    mk('ok', '  25 skills loaded (18 core · 7 misc).'),
     mk('dim', "  Type 'help' to explore. Running 'tree'..."),
     mk('blank', ''),
   ];
@@ -474,6 +669,8 @@ export default function Skills() {
   const [historyIdx, setHistoryIdx]     = useState(-1);
   const [headerIdx, setHeaderIdx]       = useState(0);       // idle skill cycler
   const [showGame, setShowGame]         = useState(false);    // dino game
+  const [showHtop, setShowHtop]         = useState(false);    // htop dashboard
+  const { theme, toggleTheme }          = useTheme();
 
   // Header ticker — cycles top skills (idle "shows main skills")
   useEffect(() => {
@@ -555,7 +752,7 @@ export default function Skills() {
       case 'help':
         appendLines([
           { id: _id++, type: 'blank', text: '' },
-          { id: _id++, type: 'info',  text: '  Commands:' },
+          { id: _id++, type: 'info',  text: '  Skills commands:' },
           { id: _id++, type: 'blank', text: '' },
           { id: _id++, type: 'out',   text: '  tree                       File tree of all skills with proficiency bars' },
           { id: _id++, type: 'out',   text: '  tree <category>            Filter tree by category name' },
@@ -564,8 +761,27 @@ export default function Skills() {
           { id: _id++, type: 'out',   text: '  cat <skill>                View skill details  (e.g. cat python)' },
           { id: _id++, type: 'out',   text: '  skills                     Table of all skills with proficiency' },
           { id: _id++, type: 'out',   text: '  skills --cat <name>        Filter skills table by category' },
+          { id: _id++, type: 'out',   text: '  htop                       Live skills dashboard' },
+          { id: _id++, type: 'blank', text: '' },
+          { id: _id++, type: 'info',  text: '  Linux commands:' },
+          { id: _id++, type: 'blank', text: '' },
+          { id: _id++, type: 'out',   text: '  pwd                        Print working directory' },
+          { id: _id++, type: 'out',   text: '  echo <text>                Print text to terminal' },
+          { id: _id++, type: 'out',   text: '  date                       Current date and time' },
+          { id: _id++, type: 'out',   text: '  uname -a                   System information' },
+          { id: _id++, type: 'out',   text: '  uptime                     Session uptime' },
+          { id: _id++, type: 'out',   text: '  env                        Environment variables' },
+          { id: _id++, type: 'out',   text: '  alias                      List command aliases' },
+          { id: _id++, type: 'out',   text: '  which <cmd>                Show command path' },
+          { id: _id++, type: 'out',   text: '  man <cmd>                  Command manual' },
+          { id: _id++, type: 'out',   text: '  neofetch                   System info + ASCII art' },
           { id: _id++, type: 'out',   text: '  history                    Command history' },
           { id: _id++, type: 'out',   text: '  clear                      Clear terminal  (Ctrl+L)' },
+          { id: _id++, type: 'out',   text: '  reboot                     Restart terminal' },
+          { id: _id++, type: 'out',   text: '  sudo reboot                Reload the entire page' },
+          { id: _id++, type: 'out',   text: '  theme                      Toggle dark / light mode' },
+          { id: _id++, type: 'out',   text: '  goto <section>             Scroll to a section' },
+          { id: _id++, type: 'out',   text: '  view-source                Open source code on GitHub' },
           { id: _id++, type: 'blank', text: '' },
           { id: _id++, type: 'dim',   text: '  Categories: languages · data-engineering · infrastructure · databases · monitoring-tools' },
           { id: _id++, type: 'dim',   text: '  Tip: ↑/↓ arrow keys for history · Ctrl+C cancel · Ctrl+L clear' },
@@ -661,6 +877,18 @@ export default function Skills() {
         appendLines(cmdSelect());
         break;
 
+      case 'htop':
+        appendLines([
+          { id: _id++, type: 'blank', text: '' },
+          { id: _id++, type: 'ok',   text: '  ⬡  Launching skills-htop...' },
+          { id: _id++, type: 'blank', text: '' },
+        ]);
+        setTimeout(() => {
+          setShowHtop(true);
+          inputRef.current?.blur();
+        }, 300);
+        break;
+
       case 'game':
         appendLines([
           { id: _id++, type: 'blank', text: '' },
@@ -682,6 +910,302 @@ export default function Skills() {
           { id: _id++, type: 'blank', text: '' },
         ]);
         break;
+
+      case 'pwd':
+        appendLines([
+          { id: _id++, type: 'out', text: '  /home/tejpreet/skills' },
+          { id: _id++, type: 'blank', text: '' },
+        ]);
+        break;
+
+      case 'echo':
+        appendLines([
+          { id: _id++, type: 'out', text: rest ? `  ${rest}` : '' },
+          { id: _id++, type: 'blank', text: '' },
+        ]);
+        break;
+
+      case 'date':
+        appendLines([
+          { id: _id++, type: 'out', text: `  ${new Date().toString()}` },
+          { id: _id++, type: 'blank', text: '' },
+        ]);
+        break;
+
+      case 'uname':
+        appendLines([
+          { id: _id++, type: 'out', text: '  SkillsOS 6.1.0-tejpreet #1 SMP x86_64 GNU/Linux' },
+          { id: _id++, type: 'blank', text: '' },
+        ]);
+        break;
+
+      case 'uptime': {
+        const mins = Math.floor(performance.now() / 60000);
+        const secs = Math.floor((performance.now() % 60000) / 1000);
+        appendLines([
+          { id: _id++, type: 'out', text: `  up ${mins}m ${secs}s,  1 user,  load average: 0.${ALL_SKILLS.length}, 0.${skillCategories.length}, 0.42` },
+          { id: _id++, type: 'blank', text: '' },
+        ]);
+        break;
+      }
+
+      case 'env':
+        appendLines([
+          { id: _id++, type: 'blank', text: '' },
+          { id: _id++, type: 'out', text: '  USER=tejpreet' },
+          { id: _id++, type: 'out', text: '  HOME=/home/tejpreet' },
+          { id: _id++, type: 'out', text: '  SHELL=/bin/zsh' },
+          { id: _id++, type: 'out', text: `  PWD=/home/tejpreet/skills` },
+          { id: _id++, type: 'out', text: '  LANG=en_US.UTF-8' },
+          { id: _id++, type: 'out', text: `  SKILLS=${ALL_SKILLS.length}` },
+          { id: _id++, type: 'out', text: `  CATEGORIES=${skillCategories.length}` },
+          { id: _id++, type: 'out', text: '  PIPELINE=MQTT→Kafka→Spark→DeltaLake→Grafana' },
+          { id: _id++, type: 'out', text: '  TERM=skills-terminal-1.0.0' },
+          { id: _id++, type: 'blank', text: '' },
+        ]);
+        break;
+
+      case 'alias':
+        appendLines([
+          { id: _id++, type: 'blank', text: '' },
+          { id: _id++, type: 'out', text: "  alias ll='ls -la'" },
+          { id: _id++, type: 'out', text: "  alias gs='skills'" },
+          { id: _id++, type: 'out', text: "  alias gt='tree'" },
+          { id: _id++, type: 'out', text: "  alias hire='sudo hire tejpreet'" },
+          { id: _id++, type: 'out', text: "  alias top='htop'" },
+          { id: _id++, type: 'blank', text: '' },
+        ]);
+        break;
+
+      case 'which': {
+        const knownCmds: Record<string, string> = {
+          tree: '/usr/local/bin/tree', ls: '/bin/ls', cat: '/bin/cat',
+          skills: '/usr/local/bin/skills', htop: '/usr/bin/htop',
+          clear: '/usr/bin/clear', history: '/usr/bin/history',
+          pwd: '/bin/pwd', echo: '/bin/echo', date: '/bin/date',
+          uname: '/bin/uname', uptime: '/usr/bin/uptime',
+          env: '/usr/bin/env', alias: '/usr/bin/alias',
+          which: '/usr/bin/which', man: '/usr/bin/man',
+          neofetch: '/usr/bin/neofetch', reboot: '/usr/sbin/reboot',
+          sudo: '/usr/bin/sudo', game: '/usr/games/dino',
+        };
+        const path = rest && knownCmds[rest.toLowerCase()];
+        appendLines(path
+          ? [{ id: _id++, type: 'out', text: `  ${path}` }, { id: _id++, type: 'blank', text: '' }]
+          : [{ id: _id++, type: 'err', text: `  which: no ${rest} in ($PATH)` }, { id: _id++, type: 'blank', text: '' }]
+        );
+        break;
+      }
+
+      case 'man': {
+        const manPages: Record<string, string> = {
+          tree: 'List contents of directories in a tree-like format, sorted by proficiency.',
+          ls: 'List directory contents. Use `ls <category>` to see skills in a category.',
+          cat: 'Concatenate and display skill files. Usage: cat <skill-name>',
+          skills: 'Display all skills in a formatted table. Use --cat to filter.',
+          htop: 'Interactive skills viewer with live proficiency bars and history.',
+          clear: 'Clear the terminal screen.',
+          reboot: 'Restart the skills terminal and replay the boot animation.',
+          'view-source': 'Open the portfolio source code on GitHub in a new tab.',
+          sudo: 'Execute a command as superuser. Try: sudo hire tejpreet',
+          game: 'Launch the DINO game. Press SPACE to jump, ESC to quit.',
+          neofetch: 'Display system information alongside an ASCII art logo.',
+        };
+        if (!rest) {
+          appendLines([
+            { id: _id++, type: 'err', text: '  Usage: man <command>' },
+            { id: _id++, type: 'blank', text: '' },
+          ]);
+        } else {
+          const page = manPages[rest.toLowerCase()];
+          appendLines(page
+            ? [
+                { id: _id++, type: 'blank', text: '' },
+                { id: _id++, type: 'info',  text: `  MAN — ${rest.toUpperCase()}(1)` },
+                { id: _id++, type: 'out',   text: `  ${page}` },
+                { id: _id++, type: 'blank', text: '' },
+              ]
+            : [
+                { id: _id++, type: 'err',  text: `  No manual entry for ${rest}` },
+                { id: _id++, type: 'blank', text: '' },
+              ]
+          );
+        }
+        break;
+      }
+
+      case 'neofetch': {
+        const avgP = Math.round(ALL_SKILLS.reduce((s, sk) => s + sk.proficiency, 0) / ALL_SKILLS.length);
+        appendLines([
+          { id: _id++, type: 'blank', text: '' },
+          { id: _id++, type: 'rich', text: '', jsx: (
+            <div className="whitespace-pre text-sm leading-relaxed font-[family-name:var(--font-jetbrains)] grid grid-cols-[auto_1fr] gap-x-6">
+              <div style={{ color: '#5BCC7E', lineHeight: 1.55 }}>
+                {[
+                  '   ████████   ',
+                  '  ██  ██  ██  ',
+                  '  ██████████  ',
+                  '   ████████   ',
+                  '  ██  ██  ██  ',
+                  '  ████████    ',
+                  '              ',
+                ].map((r, i) => <div key={i}>{r}</div>)}
+              </div>
+              <div style={{ lineHeight: 1.55 }}>
+                <div><span style={{ color: '#5BCC7E', fontWeight: 700 }}>tejpreet</span><span style={{ color: 'var(--terminal-muted)' }}>@</span><span style={{ color: '#5BCC7E', fontWeight: 700 }}>skills</span></div>
+                <div style={{ color: 'var(--terminal-muted)' }}>{'─'.repeat(22)}</div>
+                <div><span style={{ color: 'var(--color-cyan)' }}>OS</span><span style={{ color: 'var(--terminal-muted)' }}>: </span><span style={{ color: 'var(--terminal-text)' }}>SkillsOS 6.1.0</span></div>
+                <div><span style={{ color: 'var(--color-cyan)' }}>Shell</span><span style={{ color: 'var(--terminal-muted)' }}>: </span><span style={{ color: 'var(--terminal-text)' }}>skills-terminal v1.0.0</span></div>
+                <div><span style={{ color: 'var(--color-cyan)' }}>Skills</span><span style={{ color: 'var(--terminal-muted)' }}>: </span><span style={{ color: 'var(--terminal-text)' }}>{ALL_SKILLS.length} loaded</span></div>
+                <div><span style={{ color: 'var(--color-cyan)' }}>Categories</span><span style={{ color: 'var(--terminal-muted)' }}>: </span><span style={{ color: 'var(--terminal-text)' }}>{skillCategories.length}</span></div>
+                <div><span style={{ color: 'var(--color-cyan)' }}>Avg Prof</span><span style={{ color: 'var(--terminal-muted)' }}>: </span><span style={{ color: 'var(--terminal-text)' }}>{avgP}%</span></div>
+                <div><span style={{ color: 'var(--color-cyan)' }}>Stack</span><span style={{ color: 'var(--terminal-muted)' }}>: </span><span style={{ color: 'var(--terminal-text)' }}>Python · Kafka · Spark · Delta</span></div>
+                <div><span style={{ color: 'var(--color-cyan)' }}>Role</span><span style={{ color: 'var(--terminal-muted)' }}>: </span><span style={{ color: 'var(--terminal-text)' }}>Data Engineer</span></div>
+              </div>
+            </div>
+          )},
+          { id: _id++, type: 'blank', text: '' },
+        ]);
+        break;
+      }
+
+      case 'exit':
+      case 'logout':
+        appendLines([
+          { id: _id++, type: 'dim', text: '  logout: cannot exit a browser tab — you are stuck here :)' },
+          { id: _id++, type: 'blank', text: '' },
+        ]);
+        break;
+
+      case 'rm':
+        if (args.includes('-rf') || args.includes('-r')) {
+          appendLines([
+            { id: _id++, type: 'err',  text: '  rm: cannot remove \'/\': Permission denied' },
+            { id: _id++, type: 'dim',  text: '  nice try.' },
+            { id: _id++, type: 'blank', text: '' },
+          ]);
+        } else {
+          appendLines([
+            { id: _id++, type: 'err',  text: `  rm: missing operand` },
+            { id: _id++, type: 'blank', text: '' },
+          ]);
+        }
+        break;
+
+      case 'view-source':
+      case 'source':
+        appendLines([
+          { id: _id++, type: 'blank', text: '' },
+          { id: _id++, type: 'ok',   text: '  ↗  Opening source code...' },
+          { id: _id++, type: 'dim',  text: '  github.com/singhtejpreet2004/portfolio-website' },
+          { id: _id++, type: 'blank', text: '' },
+        ]);
+        setTimeout(() => window.open('https://github.com/singhtejpreet2004/portfolio-website', '_blank'), 400);
+        break;
+
+      case 'reboot':
+      case 'restart': {
+        setLines([{ id: _id++, type: 'info', text: '  System rebooting...' }]);
+        setInputEnabled(false);
+        setShowGame(false);
+        setShowHtop(false);
+        const boot = buildBoot();
+        let ri = 0;
+        const timers: ReturnType<typeof setTimeout>[] = [];
+        const next = () => {
+          if (ri >= boot.length) {
+            const treeLines = cmdTree();
+            const t = setTimeout(() => {
+              setLines((prev) => [
+                ...prev,
+                { id: _id++, type: 'cmd', text: 'tree' },
+                ...treeLines.filter((l): l is Line => !!l),
+              ]);
+              setInputEnabled(true);
+              setTimeout(() => inputRef.current?.focus(), 100);
+            }, 400);
+            timers.push(t);
+            return;
+          }
+          setLines((prev) => [...prev, boot[ri++]]);
+          timers.push(setTimeout(next, ri <= 5 ? 100 : ri <= 11 ? 65 : 40));
+        };
+        timers.push(setTimeout(() => { setLines([]); setTimeout(next, 200); }, 600));
+        break;
+      }
+
+      case 'theme':
+      case 'toggle-theme': {
+        const next = theme === 'dark' ? 'light' : 'dark';
+        appendLines([
+          { id: _id++, type: 'blank', text: '' },
+          { id: _id++, type: 'ok',   text: `  ◑  Switching to ${next} mode...` },
+          { id: _id++, type: 'blank', text: '' },
+        ]);
+        setTimeout(() => toggleTheme(), 300);
+        break;
+      }
+
+      case 'goto':
+      case 'cd': {
+        const sections: Record<string, string> = {
+          hero: 'hero', home: 'hero',
+          about: 'about',
+          skills: 'skills',
+          experience: 'experience', exp: 'experience',
+          projects: 'projects',
+          education: 'education', edu: 'education',
+          achievements: 'achievements', awards: 'achievements',
+          contact: 'contact',
+        };
+        const target = rest ? sections[rest.toLowerCase().replace(/^#/, '')] : null;
+        if (!target) {
+          appendLines([
+            { id: _id++, type: 'blank', text: '' },
+            { id: _id++, type: 'err',  text: `  goto: ${rest || '(none)'}: section not found` },
+            { id: _id++, type: 'dim',  text: '  Sections: hero · about · skills · experience · projects · education · achievements · contact' },
+            { id: _id++, type: 'blank', text: '' },
+          ]);
+        } else {
+          appendLines([
+            { id: _id++, type: 'blank', text: '' },
+            { id: _id++, type: 'ok',   text: `  ↓  Navigating to #${target}...` },
+            { id: _id++, type: 'blank', text: '' },
+          ]);
+          setTimeout(() => document.getElementById(target)?.scrollIntoView({ behavior: 'smooth' }), 300);
+        }
+        break;
+      }
+
+      case 'sudo': {
+        const sub = rest.trim().toLowerCase();
+        if (sub === 'hire tejpreet') {
+          appendLines([
+            { id: _id++, type: 'blank', text: '' },
+            { id: _id++, type: 'dim',   text: '  [sudo] password for root: ••••••••' },
+            { id: _id++, type: 'ok',    text: '  ✓ Authentication successful' },
+            { id: _id++, type: 'ok',    text: '  ★  Executing hire.sh...' },
+            { id: _id++, type: 'blank', text: '' },
+          ]);
+          setTimeout(() => window.dispatchEvent(new CustomEvent('open-hire-popup')), 700);
+        } else if (sub === 'reboot') {
+          appendLines([
+            { id: _id++, type: 'blank', text: '' },
+            { id: _id++, type: 'dim',   text: '  [sudo] password for root: ••••••••' },
+            { id: _id++, type: 'ok',    text: '  ✓ Authentication successful' },
+            { id: _id++, type: 'info',  text: '  System rebooting...' },
+            { id: _id++, type: 'blank', text: '' },
+          ]);
+          setTimeout(() => window.location.reload(), 1200);
+        } else {
+          appendLines([
+            { id: _id++, type: 'err',  text: `  sudo: ${rest}: command not found` },
+            { id: _id++, type: 'dim',  text: "  Hint: try 'sudo hire tejpreet' or 'sudo reboot'" },
+            { id: _id++, type: 'blank', text: '' },
+          ]);
+        }
+        break;
+      }
 
       default:
         appendLines([
@@ -719,13 +1243,13 @@ export default function Skills() {
       case 'err':  return 'text-red-400';
       case 'info': return 'text-[var(--color-cyan)]';
       case 'ok':   return 'text-[var(--color-green)]';
-      case 'dim':  return 'text-[var(--text-secondary)]';
-      default:     return 'text-[var(--text-primary)]';
+      case 'dim':  return 'text-[var(--terminal-muted)]';
+      default:     return 'text-[var(--terminal-text)]';
     }
   }
 
   const hs = ALL[headerIdx];
-  const CHIPS = ['tree', 'skills', 'ls', 'cat python', 'cat kafka', 'cat docker', 'ls data-engineering', 'game', 'help'];
+  const CHIPS = ['tree', 'htop', 'skills', 'ls', 'cat python', 'cat kafka', 'cat docker', 'ls data-engineering', 'game', 'help'];
 
   return (
     <section ref={sectionRef} id="skills" className="relative py-24 md:py-32">
@@ -744,26 +1268,26 @@ export default function Skills() {
           {/* Terminal window */}
           <div
             className="rounded-2xl border border-[var(--border-color)] overflow-hidden shadow-[0_0_80px_rgba(88,166,255,0.05)]"
-            style={{ background: '#0D1117' }}
+            style={{ background: 'var(--terminal-bg)' }}
             onClick={() => inputRef.current?.focus()}
           >
             {/* Title bar */}
             <div
-              className="flex items-center justify-between px-4 py-3 border-b border-[rgba(48,54,61,0.9)]"
-              style={{ background: '#161B22' }}
+              className="flex items-center justify-between px-4 py-3 border-b border-[var(--terminal-border)]"
+              style={{ background: 'var(--terminal-titlebar)' }}
             >
               <div className="flex items-center gap-2">
                 <div className="w-3 h-3 rounded-full bg-[#FF5F57]" />
                 <div className="w-3 h-3 rounded-full bg-[#FEBC2E]" />
                 <div className="w-3 h-3 rounded-full bg-[#28C840]" />
-                <span className="ml-3 text-xs font-[family-name:var(--font-jetbrains)] text-[var(--text-secondary)]">
+                <span className="ml-3 text-xs font-[family-name:var(--font-jetbrains)] text-[var(--terminal-muted)]">
                   tejpreet@skills: ~/skills
                 </span>
               </div>
 
               {/* Idle skill cycler — "shows main skills when idle" */}
               <div className="hidden sm:flex items-center gap-2 text-[11px] font-[family-name:var(--font-jetbrains)]">
-                <span className="text-[var(--text-secondary)] opacity-40">◆</span>
+                <span className="text-[var(--terminal-muted)] opacity-40">◆</span>
                 <motion.span
                   key={headerIdx}
                   initial={{ opacity: 0, y: -5 }}
@@ -773,7 +1297,7 @@ export default function Skills() {
                 >
                   {hs?.name}
                 </motion.span>
-                <span className="text-[var(--text-secondary)] opacity-40">
+                <span className="text-[var(--terminal-muted)] opacity-40">
                   {bar(hs?.proficiency ?? 0, 10)}
                 </span>
                 <span style={{ color: hs?.color }} className="opacity-80">
@@ -782,55 +1306,65 @@ export default function Skills() {
               </div>
             </div>
 
-            {/* Output buffer */}
-            <div
-              ref={outputRef}
-              data-lenis-prevent
-              className="h-[560px] md:h-[640px] overflow-y-auto p-5 font-[family-name:var(--font-jetbrains)] text-sm leading-relaxed select-text"
-              style={{ scrollbarWidth: 'thin', scrollbarColor: '#30363D transparent' }}
-            >
-              {lines.filter((l): l is Line => !!l).map((line) => (
-                <div key={line.id} className={line.type !== 'rich' ? lc(line.type) : ''}>
-                  {line.jsx ? (
-                    line.jsx
-                  ) : line.type === 'cmd' ? (
-                    <div className="whitespace-pre text-sm leading-relaxed">
-                      <span className="text-[var(--color-green)]">tejpreet@skills</span>
-                      <span className="text-[var(--text-secondary)]">:~/skills$</span>
-                      <span className="text-[var(--color-yellow)]"> {line.text}</span>
-                    </div>
-                  ) : (
-                    <div className="whitespace-pre text-sm leading-relaxed">{line.text || '\u00A0'}</div>
-                  )}
-                </div>
-              ))}
+            {/* Output buffer — hidden when htop or game is fullscreen */}
+            {!showHtop && (
+              <div
+                ref={outputRef}
+                data-lenis-prevent
+                className="h-[560px] md:h-[640px] overflow-y-auto p-5 font-[family-name:var(--font-jetbrains)] text-sm leading-relaxed select-text"
+                style={{ scrollbarWidth: 'thin', scrollbarColor: 'var(--terminal-scrollbar) transparent' }}
+              >
+                {lines.filter((l): l is Line => !!l).map((line) => (
+                  <div key={line.id} className={line.type !== 'rich' ? lc(line.type) : ''}>
+                    {line.jsx ? (
+                      line.jsx
+                    ) : line.type === 'cmd' ? (
+                      <div className="whitespace-pre text-sm leading-relaxed">
+                        <span className="text-[var(--color-green)]">tejpreet@skills</span>
+                        <span className="text-[var(--terminal-muted)]">:~/skills$</span>
+                        <span className="text-[var(--color-yellow)]"> {line.text}</span>
+                      </div>
+                    ) : (
+                      <div className="whitespace-pre text-sm leading-relaxed">{line.text || '\u00A0'}</div>
+                    )}
+                  </div>
+                ))}
 
-              {/* Input prompt */}
-              {inputEnabled && !showGame && (
-                <div className="flex items-center mt-1">
-                  <span className="text-[var(--color-green)] text-sm whitespace-nowrap">tejpreet@skills</span>
-                  <span className="text-[var(--text-secondary)] text-sm">:~/skills$&nbsp;</span>
-                  <input
-                    ref={inputRef}
-                    value={input}
-                    onChange={(e) => setInput(e.target.value)}
-                    onKeyDown={handleKeyDown}
-                    disabled={!inputEnabled}
-                    spellCheck={false}
-                    autoCapitalize="off"
-                    autoCorrect="off"
-                    autoComplete="off"
-                    className="flex-1 bg-transparent outline-none caret-[var(--color-yellow)] text-[var(--color-yellow)] text-sm"
-                    aria-label="Terminal input"
-                  />
-                </div>
-              )}
-            </div>
+                {/* Input prompt */}
+                {inputEnabled && !showGame && (
+                  <div className="flex items-center mt-1">
+                    <span className="text-[var(--color-green)] text-sm whitespace-nowrap">tejpreet@skills</span>
+                    <span className="text-[var(--terminal-muted)] text-sm">:~/skills$&nbsp;</span>
+                    <input
+                      ref={inputRef}
+                      value={input}
+                      onChange={(e) => setInput(e.target.value)}
+                      onKeyDown={handleKeyDown}
+                      disabled={!inputEnabled}
+                      spellCheck={false}
+                      autoCapitalize="off"
+                      autoCorrect="off"
+                      autoComplete="off"
+                      className="flex-1 bg-transparent outline-none caret-[var(--color-yellow)] text-[var(--color-yellow)] text-sm"
+                      aria-label="Terminal input"
+                    />
+                  </div>
+                )}
+              </div>
+            )}
 
-            {/* Dino game — mounted inside the terminal below the output buffer */}
+            {/* Dino game */}
             {showGame && (
               <DinoGame onQuit={() => {
                 setShowGame(false);
+                setTimeout(() => inputRef.current?.focus(), 50);
+              }} />
+            )}
+
+            {/* htop dashboard — replaces the output buffer */}
+            {showHtop && (
+              <HtopView onQuit={() => {
+                setShowHtop(false);
                 setTimeout(() => inputRef.current?.focus(), 50);
               }} />
             )}
@@ -842,7 +1376,7 @@ export default function Skills() {
               <button
                 key={cmd}
                 onClick={() => { if (!inputEnabled) return; execCommand(cmd); setTimeout(() => inputRef.current?.focus(), 50); }}
-                className="px-3 py-1.5 rounded-full text-xs font-[family-name:var(--font-jetbrains)] bg-[var(--bg-card)] border border-[var(--border-color)] text-[var(--text-secondary)] hover:text-[var(--color-cyan)] hover:border-[var(--color-cyan)]/30 transition-colors cursor-pointer"
+                className="px-3 py-1.5 rounded-full text-xs font-[family-name:var(--font-jetbrains)] bg-[var(--bg-card)] border border-[var(--border-color)] text-[var(--terminal-muted)] hover:text-[var(--color-cyan)] hover:border-[var(--color-cyan)]/30 transition-colors cursor-pointer"
               >
                 $ {cmd}
               </button>

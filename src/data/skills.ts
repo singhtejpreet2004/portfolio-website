@@ -9,7 +9,6 @@ export const skillCategories: SkillCategory[] = [
       { name: 'PySpark', icon: '⚡', proficiency: 85, yearsOfExperience: 2, category: 'Languages' },
       { name: 'SQL', icon: '🗄️', proficiency: 88, yearsOfExperience: 4, category: 'Languages' },
       { name: 'Bash', icon: '💻', proficiency: 78, yearsOfExperience: 3, category: 'Languages' },
-      { name: 'C/C++', icon: '⚙️', proficiency: 70, yearsOfExperience: 3, category: 'Languages' },
     ],
   },
   {
@@ -19,7 +18,6 @@ export const skillCategories: SkillCategory[] = [
       { name: 'Apache Kafka', icon: '📡', proficiency: 88, yearsOfExperience: 2, category: 'Data Engineering' },
       { name: 'Apache Spark', icon: '⚡', proficiency: 85, yearsOfExperience: 2, category: 'Data Engineering' },
       { name: 'Apache Airflow', icon: '🔧', proficiency: 82, yearsOfExperience: 2, category: 'Data Engineering' },
-      { name: 'Delta Lake', icon: '🔺', proficiency: 78, yearsOfExperience: 1, category: 'Data Engineering' },
       { name: 'ETL/ELT Pipelines', icon: '🔄', proficiency: 90, yearsOfExperience: 3, category: 'Data Engineering' },
     ],
   },
@@ -30,8 +28,6 @@ export const skillCategories: SkillCategory[] = [
       { name: 'Docker', icon: '🐳', proficiency: 85, yearsOfExperience: 3, category: 'Infrastructure' },
       { name: 'Linux', icon: '🐧', proficiency: 82, yearsOfExperience: 4, category: 'Infrastructure' },
       { name: 'Git/GitHub', icon: '📝', proficiency: 88, yearsOfExperience: 4, category: 'Infrastructure' },
-      { name: 'Gitea', icon: '🏠', proficiency: 75, yearsOfExperience: 1, category: 'Infrastructure' },
-      { name: 'k3s/Edge Computing', icon: '☸️', proficiency: 65, yearsOfExperience: 1, category: 'Infrastructure' },
     ],
   },
   {
@@ -39,7 +35,6 @@ export const skillCategories: SkillCategory[] = [
     color: '#3A10E5',
     skills: [
       { name: 'MySQL', icon: '🐬', proficiency: 85, yearsOfExperience: 4, category: 'Databases' },
-      { name: 'MariaDB', icon: '🗃️', proficiency: 80, yearsOfExperience: 2, category: 'Databases' },
       { name: 'PostgreSQL', icon: '🐘', proficiency: 78, yearsOfExperience: 2, category: 'Databases' },
       { name: 'InfluxDB', icon: '📊', proficiency: 75, yearsOfExperience: 1, category: 'Databases' },
       { name: 'MinIO', icon: '📦', proficiency: 80, yearsOfExperience: 2, category: 'Databases' },
@@ -52,8 +47,17 @@ export const skillCategories: SkillCategory[] = [
       { name: 'Grafana', icon: '📈', proficiency: 82, yearsOfExperience: 2, category: 'Monitoring & Tools' },
       { name: 'Prometheus', icon: '🔥', proficiency: 78, yearsOfExperience: 1, category: 'Monitoring & Tools' },
       { name: 'Flask', icon: '🌐', proficiency: 80, yearsOfExperience: 2, category: 'Monitoring & Tools' },
-      { name: 'TensorFlow Lite', icon: '🧠', proficiency: 65, yearsOfExperience: 1, category: 'Monitoring & Tools' },
-      { name: 'Redpanda Console', icon: '🐼', proficiency: 70, yearsOfExperience: 1, category: 'Monitoring & Tools' },
     ],
   },
+];
+
+// Skills hidden from `tree` output but visible in `skills` command
+export const miscellaneousSkills: SkillCategory['skills'] = [
+  { name: 'C/C++',            icon: '⚙️', proficiency: 70, yearsOfExperience: 3, category: 'Miscellaneous' },
+  { name: 'Gitea',            icon: '🏠', proficiency: 75, yearsOfExperience: 1, category: 'Miscellaneous' },
+  { name: 'MariaDB',          icon: '🗃️', proficiency: 80, yearsOfExperience: 2, category: 'Miscellaneous' },
+  { name: 'TensorFlow Lite',  icon: '🧠', proficiency: 65, yearsOfExperience: 1, category: 'Miscellaneous' },
+  { name: 'Redpanda Console', icon: '🐼', proficiency: 70, yearsOfExperience: 1, category: 'Miscellaneous' },
+  { name: 'Delta Lake',       icon: '🔺', proficiency: 78, yearsOfExperience: 1, category: 'Miscellaneous' },
+  { name: 'k3s/Edge Computing', icon: '☸️', proficiency: 65, yearsOfExperience: 1, category: 'Miscellaneous' },
 ];
