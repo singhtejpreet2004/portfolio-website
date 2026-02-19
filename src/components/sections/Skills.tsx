@@ -1,12 +1,15 @@
 'use client';
 
 import { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useTransform } from 'framer-motion';
 import SectionHeading from '@/components/ui/SectionHeading';
 import { skillCategories } from '@/data/skills';
+import { useMouseContext } from '@/contexts/MouseContext';
 
 export default function Skills() {
   const [activeCategory, setActiveCategory] = useState('All');
+  const { springX } = useMouseContext();
+  const gridParallaxX = useTransform(springX, [-1, 1], [-7, 7]);
 
   const allSkills = activeCategory === 'All'
     ? skillCategories
@@ -55,14 +58,21 @@ export default function Skills() {
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.3 }}
             className="grid md:grid-cols-2 lg:grid-cols-3 gap-6"
+            style={{ x: gridParallaxX, willChange: 'transform' }}
           >
             {allSkills.map((category, catIdx) => (
               <motion.div
                 key={category.name}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: catIdx * 0.1 }}
+                initial={{
+                  opacity: 0,
+                  y: 80,
+                  x: catIdx % 3 === 0 ? -60 : catIdx % 3 === 2 ? 60 : 0,
+                  scale: 0.8,
+                  rotateZ: catIdx % 2 === 0 ? -3 : 3,
+                }}
+                whileInView={{ opacity: 1, y: 0, x: 0, scale: 1, rotateZ: 0 }}
+                viewport={{ once: true, margin: '-80px' }}
+                transition={{ delay: catIdx * 0.12, duration: 0.7, type: 'spring', stiffness: 200, damping: 22 }}
                 whileHover={{ y: -4 }}
                 className="p-6 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] hover:border-opacity-50 transition-all duration-300 group"
                 style={{

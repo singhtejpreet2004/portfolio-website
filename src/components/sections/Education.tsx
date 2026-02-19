@@ -30,10 +30,10 @@ function EducationCard({ edu, index }: { edu: (typeof education)[0]; index: numb
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 30 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      transition={{ delay: index * 0.15 }}
+      initial={{ opacity: 0, y: -60, scaleX: 0.95 }}
+      whileInView={{ opacity: 1, y: 0, scaleX: 1 }}
+      viewport={{ once: true, margin: '-80px' }}
+      transition={{ delay: index * 0.2, duration: 0.6, type: 'spring', stiffness: 200, damping: 24 }}
       className="p-6 md:p-8 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-color)] hover:border-[var(--color-yellow)]/20 transition-all duration-300"
     >
       <div className="flex flex-col md:flex-row gap-6">

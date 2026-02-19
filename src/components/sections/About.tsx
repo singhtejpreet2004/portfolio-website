@@ -1,10 +1,11 @@
 'use client';
 
-import { useState } from 'react';
-import { motion } from 'framer-motion';
+import { useState, useRef } from 'react';
+import { motion, useScroll, useTransform } from 'framer-motion';
 import { Radio, GitBranch, FolderGit2, Trophy, Code2, FileText, Award } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import AnimatedCounter from '@/components/ui/AnimatedCounter';
+import { useMouseContext } from '@/contexts/MouseContext';
 
 // ─────────────────────────────────────────────────────────
 // STATS — 4 top + 3 bottom, dock-hover magnification
@@ -153,6 +154,22 @@ function StatCard({
 export default function About() {
   const [flipped, setFlipped] = useState(false);
   const [hoveredStat, setHoveredStat] = useState<number | null>(null);
+  const sectionRef = useRef<HTMLElement>(null);
+
+  // Scroll-driven entrance: section slides in from the right
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ['start end', 'start 0.25'],
+  });
+  const sectionSlideX = useTransform(scrollYProgress, [0, 1], [120, 0]);
+
+  // Mouse parallax depth layers
+  const { springX, springY } = useMouseContext();
+  const cardParallaxX = useTransform(springX, [-1, 1], [-7, 7]);   // flip card: layer 2
+  const cardParallaxY = useTransform(springY, [-1, 1], [-5, 5]);
+  const textParallaxX = useTransform(springX, [-1, 1], [-2, 2]);   // bio: layer 0
+  const glowX = useTransform(springX, [-1, 1], [20, -20]);          // bg glow: counter-parallax
+  const glowY = useTransform(springY, [-1, 1], [10, -10]);
 
   const handleCardFlip = () => {
     if (flipped) return;
@@ -161,11 +178,15 @@ export default function About() {
   };
 
   return (
-    <section id="about" className="relative py-24 md:py-32 overflow-hidden">
-      {/* Background glow */}
-      <div
+    <section id="about" ref={sectionRef} className="relative py-24 md:py-32 overflow-hidden">
+      {/* Background glow — moves counter to mouse */}
+      <motion.div
         className="absolute top-0 left-0 w-96 h-96 opacity-[0.15] blur-3xl pointer-events-none"
-        style={{ background: 'radial-gradient(circle, var(--color-purple) 0%, transparent 70%)' }}
+        style={{
+          background: 'radial-gradient(circle, var(--color-purple) 0%, transparent 70%)',
+          x: glowX,
+          y: glowY,
+        }}
       />
 
       <div className="max-w-7xl mx-auto px-6">
@@ -196,14 +217,15 @@ export default function About() {
         </motion.div>
 
         {/* ── Two-column: flip card | bio ── */}
-        <div className="grid lg:grid-cols-5 gap-12 items-start">
+        {/* Scroll-driven entrance: whole grid slides in from right */}
+        <motion.div
+          className="grid lg:grid-cols-5 gap-12 items-start"
+          style={{ x: sectionSlideX, willChange: 'transform' }}
+        >
 
-          {/* Left — flip card + floating tech badges */}
+          {/* Left — flip card + floating tech badges (mouse parallax layer 2) */}
           <motion.div
-            initial={{ opacity: 0, x: -40 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true, margin: '-100px' }}
-            transition={{ duration: 0.7 }}
+            style={{ x: cardParallaxX, y: cardParallaxY, willChange: 'transform' }}
             className="lg:col-span-2 flex flex-col items-center"
           >
             <div className="relative">
@@ -323,12 +345,9 @@ export default function About() {
             </div>
           </motion.div>
 
-          {/* Right — bio text */}
+          {/* Right — bio text (mouse parallax layer 0) */}
           <motion.div
-            initial={{ opacity: 0, x: 40 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true, margin: '-100px' }}
-            transition={{ duration: 0.7, delay: 0.2 }}
+            style={{ x: textParallaxX, willChange: 'transform' }}
             className="lg:col-span-3 space-y-6 text-[var(--text-secondary)] text-lg leading-relaxed"
           >
             <p>
@@ -357,7 +376,7 @@ export default function About() {
               Data Science.
             </p>
           </motion.div>
-        </div>
+        </motion.div>
 
         {/* ── Stats grid: 4 top + 3 bottom, dock magnification ── */}
         <motion.div
