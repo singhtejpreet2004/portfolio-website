@@ -678,10 +678,16 @@ export default function Skills() {
     return () => clearInterval(id);
   }, []);
 
-  // Scroll entrance — spring rise matching site style
-  const { scrollYProgress } = useScroll({ target: sectionRef, offset: ['start end', 'start 0.3'] });
-  const sectionY       = useTransform(scrollYProgress, [0, 1], [80, 0]);
-  const sectionOpacity = useTransform(scrollYProgress, [0, 0.45], [0, 1]);
+  // Scroll entrance — spring rise
+  const { scrollYProgress: enterProgress } = useScroll({ target: sectionRef, offset: ['start end', 'start 0.3'] });
+  const sectionY       = useTransform(enterProgress, [0, 1], [80, 0]);
+  const sectionOpacity = useTransform(enterProgress, [0, 0.45], [0, 1]);
+
+  // Scroll exit — terminal zooms in and fades (mirrors Hero dashboard)
+  const { scrollYProgress: exitProgress } = useScroll({ target: sectionRef, offset: ['start start', 'end start'] });
+  const exitScale   = useTransform(exitProgress, [0.42, 1], [1, 1.18]);
+  const exitOpacity = useTransform(exitProgress, [0.48, 0.88], [1, 0]);
+  const exitY       = useTransform(exitProgress, [0.42, 1], [0, -52]);
 
   // Auto-scroll to bottom
   useEffect(() => {
@@ -1265,6 +1271,8 @@ export default function Skills() {
         />
 
         <motion.div style={{ y: sectionY, opacity: sectionOpacity }}>
+          {/* Exit animation — zooms in and fades as section scrolls out (mirrors Hero dashboard) */}
+          <motion.div style={{ scale: exitScale, opacity: exitOpacity, y: exitY, willChange: 'transform, opacity' }}>
           {/* Terminal window */}
           <div
             className="rounded-2xl border border-[var(--border-color)] overflow-hidden shadow-[0_0_80px_rgba(88,166,255,0.05)]"
@@ -1382,6 +1390,7 @@ export default function Skills() {
               </button>
             ))}
           </div>
+          </motion.div>{/* /exit animation */}
         </motion.div>
       </div>
     </section>
