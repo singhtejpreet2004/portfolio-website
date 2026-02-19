@@ -2,17 +2,22 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, Sun, Moon, Download } from 'lucide-react';
+import {
+  Menu, X, Sun, Moon, Download,
+  User, Code2, Briefcase, FolderOpen,
+  GraduationCap, Trophy, Mail,
+  type LucideIcon,
+} from 'lucide-react';
 import { useTheme } from '@/components/providers/ThemeProvider';
 
-const navItems = [
-  { label: 'About',        href: '#about' },
-  { label: 'Skills',       href: '#skills' },
-  { label: 'Experience',   href: '#experience' },
-  { label: 'Projects',     href: '#projects' },
-  { label: 'Education',    href: '#education' },
-  { label: 'Achievements', href: '#achievements' },
-  { label: 'Contact',      href: '#contact' },
+const navItems: { label: string; href: string; icon: LucideIcon }[] = [
+  { label: 'About',        href: '#about',        icon: User          },
+  { label: 'Skills',       href: '#skills',       icon: Code2         },
+  { label: 'Experience',   href: '#experience',   icon: Briefcase     },
+  { label: 'Projects',     href: '#projects',     icon: FolderOpen    },
+  { label: 'Education',    href: '#education',    icon: GraduationCap },
+  { label: 'Achievements', href: '#achievements', icon: Trophy        },
+  { label: 'Contact',      href: '#contact',      icon: Mail          },
 ];
 
 export default function Navigation() {
@@ -72,14 +77,16 @@ export default function Navigation() {
         {/* Divider */}
         <div className="w-6 h-px rounded-full mb-1" style={{ background: 'var(--border-color)' }} />
 
-        {/* Nav items — vertical stack */}
+        {/* Nav items — icon-only vertical stack */}
         {navItems.map((item) => {
           const isActive = activeSection === item.href.replace('#', '');
+          const Icon = item.icon;
           return (
             <a
               key={item.href}
               href={item.href}
-              className={`relative px-3 py-1.5 text-xs font-medium rounded-full transition-colors duration-200 w-full text-center ${
+              title={item.label}
+              className={`relative flex items-center justify-center w-9 h-9 rounded-full transition-colors duration-200 ${
                 isActive
                   ? 'text-[var(--color-yellow)]'
                   : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
@@ -92,7 +99,7 @@ export default function Navigation() {
                   transition={{ type: 'spring', stiffness: 400, damping: 30 }}
                 />
               )}
-              <span className="relative z-10">{item.label}</span>
+              <Icon size={16} className="relative z-10" />
             </a>
           );
         })}
