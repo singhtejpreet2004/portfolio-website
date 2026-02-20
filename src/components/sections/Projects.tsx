@@ -673,77 +673,6 @@ function GitLogTerminal({ projects: projs, onClose }: { projects: typeof project
 }
 
 // ─────────────────────────────────────────────────────────
-// EASTER EGG 3 — "all seen" celebration confetti burst
-// ─────────────────────────────────────────────────────────
-
-const CONFETTI_COLORS = ['#58a6ff', '#FFD300', '#5BCC7E', '#ff79c6', '#bd93f9'];
-
-function ConfettiPiece({ color, index }: { color: string; index: number }) {
-  const angle = (index / 18) * Math.PI * 2;
-  const dist  = 120 + Math.random() * 80;
-  return (
-    <motion.div
-      className="absolute w-2 h-2 rounded-sm pointer-events-none"
-      style={{ background: color, left: '50%', top: '50%' }}
-      initial={{ x: 0, y: 0, rotate: 0, opacity: 1 }}
-      animate={{
-        x: Math.cos(angle) * dist,
-        y: Math.sin(angle) * dist,
-        rotate: Math.random() * 360,
-        opacity: 0,
-      }}
-      transition={{ duration: 0.9 + Math.random() * 0.4, ease: [0.22, 0.68, 0, 1.2] }}
-    />
-  );
-}
-
-function AllSeenCelebration({ onDone }: { onDone: () => void }) {
-  useEffect(() => {
-    const t = setTimeout(onDone, 3000);
-    return () => clearTimeout(t);
-  }, [onDone]);
-
-  const pieces = Array.from({ length: 18 }, (_, i) => ({
-    color: CONFETTI_COLORS[i % CONFETTI_COLORS.length],
-    i,
-  }));
-
-  return (
-    <motion.div
-      className="fixed inset-0 z-[250] flex items-center justify-center pointer-events-none"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-    >
-      <div className="relative flex flex-col items-center gap-3">
-        {/* Confetti */}
-        {pieces.map(({ color, i }) => (
-          <ConfettiPiece key={i} color={color} index={i} />
-        ))}
-        <motion.div
-          initial={{ scale: 0.6, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          exit={{ scale: 0.8, opacity: 0 }}
-          transition={{ type: 'spring', stiffness: 380, damping: 22 }}
-          className="flex flex-col items-center gap-2 px-6 py-4 rounded-2xl text-center"
-          style={{
-            background: 'rgba(16,22,47,0.92)',
-            border: '1px solid rgba(88,166,255,0.3)',
-            backdropFilter: 'blur(12px)',
-          }}
-        >
-          <span className="text-2xl">🎉</span>
-          <p className="text-sm font-bold text-[var(--text-primary)]">All commits reviewed</p>
-          <p className="text-[11px] font-[family-name:var(--font-jetbrains)] text-[var(--color-cyan)]">
-            git log --all · HEAD detached @ latest
-          </p>
-        </motion.div>
-      </div>
-    </motion.div>
-  );
-}
-
-// ─────────────────────────────────────────────────────────
 // SORT: latest first
 // ─────────────────────────────────────────────────────────
 
@@ -819,18 +748,6 @@ export default function Projects() {
     }
   }, []);
 
-  // EE3: all-seen celebration — track visited project indices
-  const visitedRef   = useRef(new Set<number>([0])); // starts at 0
-  const [showAllSeen, setShowAllSeen] = useState(false);
-  const allSeenShownRef = useRef(false);
-  useEffect(() => {
-    visitedRef.current.add(activeIndex);
-    if (!allSeenShownRef.current && visitedRef.current.size === n) {
-      allSeenShownRef.current = true;
-      // small delay so the last card settles first
-      setTimeout(() => setShowAllSeen(true), 600);
-    }
-  }, [activeIndex, n]);
 
   return (
     <section
@@ -1062,12 +979,6 @@ export default function Projects() {
         )}
       </AnimatePresence>
 
-      {/* EE3: all-seen confetti */}
-      <AnimatePresence>
-        {showAllSeen && (
-          <AllSeenCelebration onDone={() => setShowAllSeen(false)} />
-        )}
-      </AnimatePresence>
     </section>
   );
 }
