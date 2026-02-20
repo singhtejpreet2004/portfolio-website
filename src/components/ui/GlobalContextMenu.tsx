@@ -400,6 +400,13 @@ export default function GlobalContextMenu() {
     return () => window.removeEventListener('click', close);
   }, []);
 
+  // Open hire popup via custom event (triggered by skills terminal `sudo hire tejpreet`)
+  useEffect(() => {
+    const handler = () => setHireStep('form');
+    window.addEventListener('open-hire-popup', handler);
+    return () => window.removeEventListener('open-hire-popup', handler);
+  }, []);
+
   return (
     <>
       {/* Terminal Context Menu */}

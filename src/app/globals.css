@@ -48,6 +48,19 @@
   --text-primary: var(--color-text-primary);
   --text-secondary: var(--color-text-secondary);
   --border-color: rgba(255, 255, 255, 0.08);
+  /* Nav accent — yellow in dark mode */
+  --nav-accent: var(--color-yellow);
+  /* Code syntax colors — adapted per theme */
+  --code-keyword: var(--color-cyan);
+  --code-fn: var(--color-yellow);
+  --code-string: var(--color-green);
+  /* Terminal — dark theme defaults */
+  --terminal-bg: #0D1117;
+  --terminal-titlebar: #161B22;
+  --terminal-border: rgba(48, 54, 61, 0.9);
+  --terminal-text: #c9d1d9;
+  --terminal-muted: #8b949e;
+  --terminal-scrollbar: #30363D;
 }
 
 [data-theme="light"] {
@@ -67,6 +80,19 @@
   --shadow-elevated: 0 8px 40px rgba(0, 0, 0, 0.1);
   --gradient-hero: linear-gradient(135deg, #FAFAF8 0%, #FFF0E5 50%, #FAFAF8 100%);
   --gradient-card: linear-gradient(145deg, #FFFFFF 0%, #F7F5F0 100%);
+  /* Nav accent — cyan in light mode */
+  --nav-accent: var(--color-cyan);
+  /* Code syntax — readable on light backgrounds */
+  --code-keyword: #0550ae;
+  --code-fn: #953800;
+  --code-string: #116329;
+  /* Terminal — light theme overrides */
+  --terminal-bg: #F3F4F6;
+  --terminal-titlebar: #E5E7EB;
+  --terminal-border: rgba(0, 0, 0, 0.18);
+  --terminal-text: #0D1117;
+  --terminal-muted: #3D444D;
+  --terminal-scrollbar: #9CA3AF;
 }
 
 @theme inline {

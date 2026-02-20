@@ -20,9 +20,10 @@ export default function LoadingScreen() {
   useEffect(() => {
     setVisible(true);
 
-    // Boot lines
+    // Boot lines — collect all timer IDs so cleanup cancels them (fixes StrictMode double messages)
+    const timers: ReturnType<typeof setTimeout>[] = [];
     BOOT_LINES.forEach(({ text, delay }) => {
-      setTimeout(() => setLines((l) => [...l, text]), delay);
+      timers.push(setTimeout(() => setLines((l) => [...l, text]), delay));
     });
 
     // Progress bar
@@ -36,11 +37,9 @@ export default function LoadingScreen() {
     requestAnimationFrame(tick);
 
     // Dismiss
-    const timer = setTimeout(() => {
-      setVisible(false);
-    }, TOTAL_MS + 300);
+    timers.push(setTimeout(() => setVisible(false), TOTAL_MS + 300));
 
-    return () => clearTimeout(timer);
+    return () => timers.forEach(clearTimeout);
   }, []);
 
   return (

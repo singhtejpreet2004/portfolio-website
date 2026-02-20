@@ -2,24 +2,38 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, Sun, Moon, Download } from 'lucide-react';
+import {
+  Menu, X, Sun, Moon, Download,
+  Star, User, Code2, Briefcase, FolderOpen,
+  GraduationCap, Trophy, Mail,
+  type LucideIcon,
+} from 'lucide-react';
 import { useTheme } from '@/components/providers/ThemeProvider';
 
-const navItems = [
-  { label: 'About', href: '#about' },
-  { label: 'Skills', href: '#skills' },
-  { label: 'Experience', href: '#experience' },
-  { label: 'Projects', href: '#projects' },
-  { label: 'Education', href: '#education' },
-  { label: 'Achievements', href: '#achievements' },
-  { label: 'Contact', href: '#contact' },
+const navItems: { label: string; href: string; icon: LucideIcon }[] = [
+  { label: 'About',        href: '#about',        icon: User          },
+  { label: 'Skills',       href: '#skills',       icon: Code2         },
+  { label: 'Experience',   href: '#experience',   icon: Briefcase     },
+  { label: 'Projects',     href: '#projects',     icon: FolderOpen    },
+  { label: 'Education',    href: '#education',    icon: GraduationCap },
+  { label: 'Achievements', href: '#achievements', icon: Trophy        },
+  { label: 'Contact',      href: '#contact',      icon: Mail          },
 ];
 
 export default function Navigation() {
-  const [isScrolled, setIsScrolled] = useState(false);
+  const [isScrolled, setIsScrolled]       = useState(false);
   const [activeSection, setActiveSection] = useState('');
-  const [mobileOpen, setMobileOpen] = useState(false);
+  const [mobileOpen, setMobileOpen]       = useState(false);
   const { theme, toggleTheme } = useTheme();
+
+  const isDark = theme === 'dark';
+  // Accent class bundles — yellow in dark, cyan in light
+  const aText  = isDark ? 'text-[var(--color-yellow)]'                                                 : 'text-[var(--color-cyan)]';
+  const aBorder= isDark ? 'border-[var(--color-yellow)]/50 hover:border-[var(--color-yellow)] hover:bg-[var(--color-yellow)]/10' : 'border-[var(--color-cyan)]/50 hover:border-[var(--color-cyan)] hover:bg-[var(--color-cyan)]/10';
+  const aActive= isDark ? 'bg-[var(--color-yellow)]/10 border border-[var(--color-yellow)]/20'         : 'bg-[var(--color-cyan)]/10 border border-[var(--color-cyan)]/20';
+  const aBg    = isDark ? 'bg-[var(--color-yellow)]'                                                   : 'bg-[var(--color-cyan)]';
+  const aBgText= isDark ? 'text-[var(--color-text-dark)]'                                              : 'text-white';
+  const aGlow  = isDark ? 'hover:shadow-[var(--shadow-glow-yellow)]'                                   : 'hover:shadow-[var(--shadow-glow-cyan)]';
 
   useEffect(() => {
     const handleScroll = () => {
@@ -44,84 +58,114 @@ export default function Navigation() {
 
   return (
     <>
+      {/* ── DESKTOP: vertical dock, right side ────────────────── */}
       <motion.nav
-        initial={{ y: -100, opacity: 0 }}
+        initial={{ x: 120, opacity: 0 }}
         animate={{
-          y: isScrolled ? 0 : -100,
-          opacity: isScrolled ? 1 : 0,
+          x:       isScrolled ? 0  : 120,
+          opacity: isScrolled ? 1  : 0,
         }}
-        transition={{ duration: 0.3 }}
-        className="fixed top-4 left-1/2 -translate-x-1/2 z-50 glass rounded-full px-2 py-2 shadow-lg"
+        transition={{ type: 'spring', stiffness: 280, damping: 28 }}
+        className="hidden md:flex fixed right-4 top-1/2 -translate-y-1/2 z-50 flex-col items-center gap-1 glass rounded-2xl px-2 py-3 shadow-xl"
       >
-        <div className="flex items-center gap-1">
-          {/* Avatar — LEFTMOST in nav bar */}
-          <a
-            href="#hero"
-            className="flex items-center justify-center w-9 h-9 rounded-full overflow-hidden border-2 border-[var(--color-yellow)]/50 hover:border-[var(--color-yellow)] transition-all mr-1"
-          >
-            <div className="w-full h-full bg-gradient-to-br from-[var(--color-yellow)]/20 to-[var(--color-purple)]/20 flex items-center justify-center">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" className="text-[var(--color-yellow)]">
-                <circle cx="12" cy="8" r="4" fill="currentColor" opacity="0.8" />
-                <path d="M4 20c0-4.4 3.6-8 8-8s8 3.6 8 8" fill="currentColor" opacity="0.5" />
-                <path d="M6 8a6 6 0 0 1 12 0" stroke="currentColor" strokeWidth="1.5" fill="none" opacity="0.4" />
-              </svg>
-            </div>
-          </a>
+        {/* Star — top of dock, links back to hero */}
+        <a
+          href="#hero"
+          className={`flex items-center justify-center w-9 h-9 rounded-full border-2 transition-all mb-1 ${aBorder} ${aText}`}
+          title="Home"
+        >
+          <Star size={16} fill="currentColor" />
+        </a>
 
-          {/* Desktop Nav Items */}
-          <div className="hidden md:flex items-center gap-1">
-            {navItems.map((item) => (
-              <a
-                key={item.href}
-                href={item.href}
-                className={`relative px-3 py-1.5 text-sm rounded-full transition-colors duration-200 ${
-                  activeSection === item.href.replace('#', '')
-                    ? 'text-[var(--color-yellow)]'
-                    : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
-                }`}
-              >
-                {item.label}
-                {activeSection === item.href.replace('#', '') && (
-                  <motion.div
-                    layoutId="activeNav"
-                    className="absolute inset-0 rounded-full bg-[var(--color-yellow)]/10 border border-[var(--color-yellow)]/20"
-                    transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-                  />
-                )}
-              </a>
-            ))}
-          </div>
+        {/* Divider */}
+        <div className="w-6 h-px rounded-full mb-1" style={{ background: 'var(--border-color)' }} />
 
-          {/* Actions */}
-          <div className="flex items-center gap-1 ml-2">
-            <button
-              onClick={(e) => toggleTheme(e)}
-              className="p-2 rounded-full text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-hover)] transition-all"
-              aria-label="Toggle theme"
-            >
-              {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
-            </button>
-
+        {/* Nav items — icon-only vertical stack */}
+        {navItems.map((item) => {
+          const isActive = activeSection === item.href.replace('#', '');
+          const Icon = item.icon;
+          return (
             <a
-              href="/resume.pdf"
-              className="hidden md:flex items-center gap-1.5 px-3 py-1.5 text-sm rounded-full bg-[var(--color-yellow)] text-[var(--color-text-dark)] font-medium hover:shadow-[var(--shadow-glow-yellow)] transition-all"
+              key={item.href}
+              href={item.href}
+              title={item.label}
+              className={`relative flex items-center justify-center w-9 h-9 rounded-full transition-colors duration-200 ${
+                isActive
+                  ? aText
+                  : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
+              }`}
             >
-              <Download size={14} />
-              Resume
+              {isActive && (
+                <motion.div
+                  layoutId="activeNav"
+                  className={`absolute inset-0 rounded-full ${aActive}`}
+                  transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+                />
+              )}
+              <Icon size={16} className="relative z-10" />
             </a>
+          );
+        })}
 
-            {/* Mobile menu button */}
-            <button
-              onClick={() => setMobileOpen(!mobileOpen)}
-              className="md:hidden p-2 rounded-full text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
-            >
-              {mobileOpen ? <X size={18} /> : <Menu size={18} />}
-            </button>
-          </div>
-        </div>
+        {/* Divider */}
+        <div className="w-6 h-px rounded-full mt-1 mb-1" style={{ background: 'var(--border-color)' }} />
+
+        {/* Theme toggle */}
+        <button
+          onClick={(e) => toggleTheme(e)}
+          className="p-2 rounded-full text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-hover)] transition-all"
+          aria-label="Toggle theme"
+        >
+          {theme === 'dark' ? <Sun size={15} /> : <Moon size={15} />}
+        </button>
+
+        {/* Resume — icon only in dock */}
+        <a
+          href="/resume.pdf"
+          className={`flex items-center justify-center w-8 h-8 rounded-full ${aBg} ${aBgText} ${aGlow} transition-all mt-0.5`}
+          title="Download Resume"
+          download
+        >
+          <Download size={14} />
+        </a>
       </motion.nav>
 
-      {/* Mobile Menu Overlay */}
+      {/* ── MOBILE: slim top bar ───────────────────────────────── */}
+      <motion.div
+        initial={{ y: -60, opacity: 0 }}
+        animate={{
+          y:       isScrolled ? 0   : -60,
+          opacity: isScrolled ? 1   : 0,
+        }}
+        transition={{ duration: 0.3 }}
+        className="md:hidden fixed top-3 left-3 right-3 z-50 glass rounded-full px-3 py-2 flex items-center justify-between shadow-lg"
+      >
+        {/* Star — home */}
+        <a
+          href="#hero"
+          className={`flex items-center justify-center w-8 h-8 rounded-full border-2 ${aBorder} ${aText}`}
+        >
+          <Star size={14} fill="currentColor" />
+        </a>
+
+        <div className="flex items-center gap-1">
+          <button
+            onClick={(e) => toggleTheme(e)}
+            className="p-2 rounded-full text-[var(--text-secondary)]"
+            aria-label="Toggle theme"
+          >
+            {theme === 'dark' ? <Sun size={15} /> : <Moon size={15} />}
+          </button>
+          <button
+            onClick={() => setMobileOpen(!mobileOpen)}
+            className="p-2 rounded-full text-[var(--text-secondary)]"
+          >
+            {mobileOpen ? <X size={18} /> : <Menu size={18} />}
+          </button>
+        </div>
+      </motion.div>
+
+      {/* ── MOBILE: fullscreen overlay menu ───────────────────── */}
       <AnimatePresence>
         {mobileOpen && (
           <motion.div
@@ -144,14 +188,14 @@ export default function Navigation() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: i * 0.05 }}
                   onClick={() => setMobileOpen(false)}
-                  className="text-2xl font-[family-name:var(--font-display)] font-bold text-[var(--text-primary)] hover:text-[var(--color-yellow)] transition-colors"
+                  className="text-2xl font-[family-name:var(--font-display)] font-bold text-[var(--text-primary)] hover:text-[var(--color-cyan)] transition-colors"
                 >
                   {item.label}
                 </motion.a>
               ))}
               <a
                 href="/resume.pdf"
-                className="mt-4 px-6 py-3 rounded-full bg-[var(--color-yellow)] text-[var(--color-text-dark)] font-medium"
+                className={`mt-4 px-6 py-3 rounded-full font-medium ${aBg} ${aBgText}`}
               >
                 Download Resume
               </a>
@@ -160,7 +204,7 @@ export default function Navigation() {
         )}
       </AnimatePresence>
 
-      {/* Scroll Progress Bar */}
+      {/* ── Scroll progress — moved to left edge ──────────────── */}
       <ScrollProgress />
     </>
   );
@@ -168,23 +212,31 @@ export default function Navigation() {
 
 function ScrollProgress() {
   const [progress, setProgress] = useState(0);
+  const [visible, setVisible]   = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
       const total = document.documentElement.scrollHeight - window.innerHeight;
       setProgress(total > 0 ? (window.scrollY / total) * 100 : 0);
+      setVisible(window.scrollY > 100);
     };
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   return (
-    <div className="fixed top-0 left-0 right-0 z-[60] h-[2px] bg-transparent">
+    <motion.div
+      initial={{ x: -16, opacity: 0 }}
+      animate={{ x: visible ? 0 : -16, opacity: visible ? 1 : 0 }}
+      transition={{ duration: 0.3 }}
+      className="fixed left-3 top-1/2 -translate-y-1/2 z-[60] w-[3px] rounded-full overflow-hidden"
+      style={{ height: '40vh', background: 'var(--border-color)' }}
+    >
       <motion.div
-        className="h-full bg-gradient-to-r from-[var(--color-yellow)] to-[var(--color-cyan)]"
-        style={{ width: `${progress}%` }}
+        className="w-full rounded-full"
+        style={{ height: `${progress}%`, background: 'var(--nav-accent)' }}
         transition={{ duration: 0.1 }}
       />
-    </div>
+    </motion.div>
   );
 }
