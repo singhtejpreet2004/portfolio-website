@@ -26,12 +26,12 @@ export const education: Education[] = [
     ],
   },
   {
-    institution: 'Your School Name', // TODO: update
+    institution: 'Stepping Stones Sr. Sec. School',
     degree: 'Higher Secondary (Class XII)',
-    field: 'Science — Physics, Chemistry, Mathematics, Computer Science',
+    field: 'Science — Physics, Chemistry, Mathematics, Computer Science · Sector 35 B, Chandigarh',
     startDate: '2020',
     endDate: '2022',
-    // gpa: 'XX%',  // TODO: add actual percentage
+    gpa: '82.6%',
     coursework: [
       'Physics',
       'Chemistry',
@@ -42,12 +42,12 @@ export const education: Education[] = [
     activities: [],
   },
   {
-    institution: 'Your School Name', // TODO: update
+    institution: 'Sahibzada Ajit Singh Academy',
     degree: 'Matriculation (Class X)',
-    field: 'Secondary Education — CBSE',
+    field: 'Secondary Education — CBSE · Roopnagar, Punjab',
     startDate: '2018',
     endDate: '2020',
-    // gpa: 'XX%',  // TODO: add actual percentage
+    gpa: '91%',
     coursework: [
       'Mathematics',
       'Science',
