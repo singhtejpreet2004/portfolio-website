@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect } from 'react';
 import Navigation from '@/components/layout/Navigation';
 import Hero from '@/components/sections/Hero';
 import About from '@/components/sections/About';
@@ -16,6 +17,14 @@ import { useMouseParallax } from '@/hooks/useMouseParallax';
 
 export default function Home() {
   const { springX, springY } = useMouseParallax();
+
+  // Always start at the top on page load / reload
+  useEffect(() => {
+    if ('scrollRestoration' in window.history) {
+      window.history.scrollRestoration = 'manual';
+    }
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  }, []);
 
   return (
     <MouseContext.Provider value={{ springX, springY }}>

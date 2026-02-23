@@ -1,9 +1,33 @@
 'use client';
 
-import { motion } from 'framer-motion';
-import { Award, BadgeCheck, Trophy, Lightbulb, FileText } from 'lucide-react';
+import { useRef } from 'react';
+import { motion, useScroll, useTransform, useSpring } from 'framer-motion';
+import { BadgeCheck, Trophy, Lightbulb, FileText } from 'lucide-react';
 import SectionHeading from '@/components/ui/SectionHeading';
 import { achievements } from '@/data/achievements';
+
+// ─────────────────────────────────────────────────────────
+// BENTO GRID LAYOUT  (grid-cols-3)
+// [0] SQL cert       1-col
+// [1] Oracle cert    1-col
+// [2] IBM cert       1-col
+// [3] Hackathon ★    2-col
+// [4] Innospark      1-col
+// [5] Top 5 Bharat   1-col
+// [6] Patent         2-col
+// [7] Research       3-col
+// ─────────────────────────────────────────────────────────
+
+const BENTO_CONFIG = [
+  { colSpan: 1, size: 'sm' as const },
+  { colSpan: 1, size: 'sm' as const },
+  { colSpan: 1, size: 'sm' as const },
+  { colSpan: 2, size: 'md' as const },
+  { colSpan: 1, size: 'sm' as const },
+  { colSpan: 1, size: 'sm' as const },
+  { colSpan: 2, size: 'md' as const },
+  { colSpan: 3, size: 'lg' as const },
+];
 
 const typeIcons = {
   certification: BadgeCheck,
@@ -11,151 +35,173 @@ const typeIcons = {
   accomplishment: Lightbulb,
 };
 
-export default function Achievements() {
-  const certifications = achievements.filter((a) => a.type === 'certification');
-  const awards = achievements.filter((a) => a.type === 'award');
-  const accomplishments = achievements.filter((a) => a.type === 'accomplishment');
+function BentoCard({
+  achievement,
+  colSpan,
+  size,
+  index,
+}: {
+  achievement: (typeof achievements)[0];
+  colSpan: number;
+  size: 'sm' | 'md' | 'lg';
+  index: number;
+}) {
+  const Icon = typeIcons[achievement.type] || Lightbulb;
+  const isLarge  = size === 'lg';
+  const isMedium = size === 'md';
 
   return (
-    <section id="achievements" className="relative py-24 md:py-32">
-      <div
-        className="absolute bottom-0 right-0 w-96 h-96 opacity-10 blur-3xl pointer-events-none"
-        style={{ background: 'radial-gradient(circle, var(--color-yellow) 0%, transparent 70%)' }}
+    <motion.div
+      initial={{ opacity: 0, y: 24, scale: 0.93 }}
+      whileInView={{ opacity: 1, y: 0, scale: 1 }}
+      viewport={{ once: true, margin: '-40px' }}
+      transition={{
+        delay: index * 0.055,
+        duration: 0.6,
+        ease: [0.22, 1, 0.36, 1],
+      }}
+      whileHover={{ y: -5, scale: 1.015, transition: { duration: 0.2, ease: 'easeOut' } }}
+      className="relative rounded-2xl border border-[var(--border-color)] overflow-hidden group cursor-default"
+      style={{
+        gridColumn: `span ${colSpan}`,
+        background: 'var(--bg-card)',
+        borderLeftWidth: '3px',
+        borderLeftColor: achievement.badgeColor,
+      }}
+    >
+      {/* Hover color wash */}
+      <motion.div
+        className="absolute inset-0 pointer-events-none"
+        style={{ background: `${achievement.badgeColor}07` }}
+        initial={{ opacity: 0 }}
+        whileHover={{ opacity: 1 }}
+        transition={{ duration: 0.22 }}
       />
 
-      <div className="max-w-7xl mx-auto px-6">
-        <SectionHeading
-          subtitle="// assert data_quality.score >= 'excellent'"
-          title="Achievements & Certifications"
-        />
-
-        {/* Certifications */}
-        <div className="mb-12">
-          <h3 className="flex items-center gap-2 text-lg font-semibold text-[var(--text-primary)] mb-6 font-[family-name:var(--font-display)]">
-            <BadgeCheck size={20} className="text-[var(--color-cyan)]" />
-            Certifications
-          </h3>
-          <div className="grid md:grid-cols-3 gap-4">
-            {certifications.map((cert, i) => (
-              <motion.div
-                key={cert.title}
-                initial={{ opacity: 0, scale: 0, rotate: i % 2 === 0 ? -15 : 15, y: 20 }}
-                whileInView={{ opacity: 1, scale: 1, rotate: 0, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.08, duration: 0.5, type: 'spring', stiffness: 400, damping: 20 }}
-                whileHover={{ y: -4, scale: 1.02 }}
-                className="p-5 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] hover:border-opacity-50 transition-all duration-300 group cursor-default"
-                style={{ borderLeftWidth: '3px', borderLeftColor: cert.badgeColor }}
-              >
-                <div className="flex items-start justify-between mb-3">
-                  <div
-                    className="w-10 h-10 rounded-lg flex items-center justify-center"
-                    style={{ backgroundColor: `${cert.badgeColor}15` }}
-                  >
-                    <BadgeCheck size={20} style={{ color: cert.badgeColor }} />
-                  </div>
-                  <span className="text-xs font-[family-name:var(--font-jetbrains)] text-[var(--text-secondary)]">
-                    {cert.date}
-                  </span>
-                </div>
-                <h4 className="font-semibold text-[var(--text-primary)] text-sm mb-1 group-hover:text-[var(--color-yellow)] transition-colors">
-                  {cert.title}
-                </h4>
-                <p className="text-xs text-[var(--text-secondary)]">{cert.issuer}</p>
-
-                {/* Shimmer effect on hover */}
-                <div className="mt-3 h-0.5 rounded-full overflow-hidden bg-[var(--bg-hover)]">
-                  <motion.div
-                    className="h-full w-full rounded-full"
-                    style={{ background: `linear-gradient(90deg, transparent, ${cert.badgeColor}, transparent)` }}
-                    initial={{ x: '-100%' }}
-                    whileHover={{ x: '100%' }}
-                    transition={{ duration: 1, repeat: Infinity }}
-                  />
-                </div>
-              </motion.div>
-            ))}
-          </div>
+      <div className={`relative z-10 h-full flex flex-col ${isLarge ? 'p-7 md:flex-row md:gap-6 md:items-start' : isMedium ? 'p-6' : 'p-5'}`}>
+        {/* Icon */}
+        <div
+          className={`flex-shrink-0 rounded-xl flex items-center justify-center mb-4 ${
+            isLarge ? 'w-12 h-12 md:mb-0' : isMedium ? 'w-11 h-11' : 'w-9 h-9'
+          }`}
+          style={{ backgroundColor: `${achievement.badgeColor}18` }}
+        >
+          {achievement.type === 'accomplishment'
+            ? <FileText size={isLarge ? 22 : isMedium ? 20 : 17} style={{ color: achievement.badgeColor }} />
+            : <Icon    size={isLarge ? 22 : isMedium ? 20 : 17} style={{ color: achievement.badgeColor }} />
+          }
         </div>
 
-        {/* Competitions & Awards */}
-        <div className="mb-12">
-          <h3 className="flex items-center gap-2 text-lg font-semibold text-[var(--text-primary)] mb-6 font-[family-name:var(--font-display)]">
-            <Trophy size={20} className="text-[var(--color-yellow)]" />
-            Competitions & Awards
-          </h3>
-          <div className="grid md:grid-cols-3 gap-4">
-            {awards.map((award, i) => (
-              <motion.div
-                key={award.title}
-                initial={{ opacity: 0, scale: 0, rotate: i % 3 === 0 ? -20 : i % 3 === 1 ? 0 : 20, y: 20 }}
-                whileInView={{ opacity: 1, scale: 1, rotate: 0, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.1, duration: 0.5, type: 'spring', stiffness: 350, damping: 22 }}
-                whileHover={{ y: -4 }}
-                className="p-5 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] hover:border-[var(--color-yellow)]/20 transition-all duration-300 group cursor-default"
-              >
-                <div className="flex items-center gap-3 mb-3">
-                  <div
-                    className="w-10 h-10 rounded-lg flex items-center justify-center"
-                    style={{ backgroundColor: `${award.badgeColor}15` }}
-                  >
-                    <Trophy size={20} style={{ color: award.badgeColor }} />
-                  </div>
-                  <span className="text-xs font-[family-name:var(--font-jetbrains)] text-[var(--text-secondary)]">
-                    {award.date}
-                  </span>
-                </div>
-                <h4 className="font-semibold text-[var(--text-primary)] text-sm mb-2 group-hover:text-[var(--color-yellow)] transition-colors">
-                  {award.title}
-                </h4>
-                <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
-                  {award.description}
-                </p>
-              </motion.div>
-            ))}
+        <div className="flex-1 min-w-0">
+          {/* Type + date */}
+          <div className="flex items-center justify-between gap-2 mb-2">
+            <span
+              className="text-[10px] uppercase tracking-widest font-semibold"
+              style={{ color: achievement.badgeColor, opacity: 0.75 }}
+            >
+              {achievement.type}
+            </span>
+            <span className="text-[10px] font-[family-name:var(--font-jetbrains)] text-[var(--text-secondary)] flex-shrink-0">
+              {achievement.date}
+            </span>
           </div>
-        </div>
 
-        {/* Research & Publications */}
-        <div>
-          <h3 className="flex items-center gap-2 text-lg font-semibold text-[var(--text-primary)] mb-6 font-[family-name:var(--font-display)]">
-            <FileText size={20} className="text-[var(--color-green)]" />
-            Research & Publications
-          </h3>
-          <div className="grid md:grid-cols-2 gap-4">
-            {accomplishments.map((acc, i) => (
-              <motion.div
-                key={acc.title}
-                initial={{ opacity: 0, scale: 0.5, y: 30 }}
-                whileInView={{ opacity: 1, scale: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.12, duration: 0.6, type: 'spring', stiffness: 300, damping: 22 }}
-                whileHover={{ y: -2 }}
-                className="p-5 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] hover:border-[var(--color-green)]/20 transition-all duration-300 cursor-default"
-              >
-                <div className="flex items-start gap-4">
-                  <div
-                    className="w-10 h-10 rounded-lg flex-shrink-0 flex items-center justify-center"
-                    style={{ backgroundColor: `${acc.badgeColor}15` }}
-                  >
-                    <Lightbulb size={20} style={{ color: acc.badgeColor }} />
-                  </div>
-                  <div>
-                    <h4 className="font-semibold text-[var(--text-primary)] text-sm mb-1">
-                      {acc.title}
-                    </h4>
-                    <p className="text-xs text-[var(--text-secondary)] mb-1">{acc.issuer} · {acc.date}</p>
-                    <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
-                      {acc.description}
-                    </p>
-                  </div>
-                </div>
-              </motion.div>
-            ))}
+          {/* Title */}
+          <h4
+            className={`font-[family-name:var(--font-display)] font-bold text-[var(--text-primary)] leading-snug group-hover:text-[var(--color-yellow)] transition-colors ${
+              isLarge ? 'text-xl mb-2' : isMedium ? 'text-base mb-1.5' : 'text-sm mb-1'
+            }`}
+          >
+            {achievement.title}
+          </h4>
+
+          {/* Issuer */}
+          <p className="text-xs text-[var(--text-secondary)] mb-2 opacity-70">
+            {achievement.issuer}
+          </p>
+
+          {/* Description — md and lg */}
+          {(isMedium || isLarge) && (
+            <p className={`text-sm text-[var(--text-secondary)] leading-relaxed ${isLarge ? '' : 'line-clamp-2'}`}>
+              {achievement.description}
+            </p>
+          )}
+
+          {/* Shimmer bar */}
+          <div className="mt-4 h-0.5 rounded-full overflow-hidden" style={{ background: 'var(--bg-hover)' }}>
+            <motion.div
+              className="h-full rounded-full"
+              style={{ background: `linear-gradient(90deg, transparent, ${achievement.badgeColor}, transparent)` }}
+              initial={{ x: '-110%' }}
+              whileInView={{ x: '110%' }}
+              viewport={{ once: true }}
+              transition={{ duration: 1.1, delay: index * 0.07 + 0.45, ease: 'easeInOut' }}
+            />
           </div>
         </div>
       </div>
+    </motion.div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────
+// MAIN SECTION
+// ─────────────────────────────────────────────────────────
+
+export default function Achievements() {
+  const sectionRef = useRef<HTMLElement>(null);
+
+  // Zoom effect: section scales from 0.97 → 1.02 as it scrolls into view
+  const { scrollYProgress } = useScroll({
+    target:  sectionRef,
+    offset: ['start end', 'center center'],
+  });
+  const rawScale = useTransform(scrollYProgress, [0, 1], [0.96, 1.02]);
+  const scale    = useSpring(rawScale, { stiffness: 55, damping: 18 });
+
+  return (
+    <section id="achievements" ref={sectionRef} className="relative py-24 md:py-32">
+      <div
+        className="absolute bottom-0 right-0 w-[500px] h-[500px] opacity-[0.08] blur-3xl pointer-events-none"
+        style={{ background: 'radial-gradient(circle, var(--color-yellow) 0%, transparent 70%)' }}
+      />
+      <div
+        className="absolute top-0 left-0 w-[400px] h-[400px] opacity-[0.05] blur-3xl pointer-events-none"
+        style={{ background: 'radial-gradient(circle, var(--color-cyan) 0%, transparent 70%)' }}
+      />
+
+      <motion.div
+        className="max-w-7xl mx-auto px-6"
+        style={{ scale, willChange: 'transform', transformOrigin: 'top center' }}
+      >
+        <SectionHeading
+          subtitle="// assert performance.score >= 'excellent'"
+          title="Achievements"
+        />
+
+        {/* Bento grid */}
+        <motion.div
+          className="grid gap-4 mt-12"
+          style={{ gridTemplateColumns: 'repeat(3, 1fr)' }}
+          initial={{ opacity: 0, y: 32 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: '-60px' }}
+          transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+        >
+          {achievements.map((achievement, i) => {
+            const config = BENTO_CONFIG[i] ?? { colSpan: 1, size: 'sm' as const };
+            return (
+              <BentoCard
+                key={achievement.title}
+                achievement={achievement}
+                colSpan={config.colSpan}
+                size={config.size}
+                index={i}
+              />
+            );
+          })}
+        </motion.div>
+      </motion.div>
     </section>
   );
 }

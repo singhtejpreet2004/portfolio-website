@@ -282,7 +282,7 @@ function cmdSelect(): Line[] {
 }
 
 // ── Dino game component ───────────────────────────────────────────────────────
-function DinoGame({ onQuit }: { onQuit: () => void }) {
+function DinoGame({ onQuit, isDark }: { onQuit: () => void; isDark: boolean }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const onQuitRef = useRef(onQuit);
   useEffect(() => { onQuitRef.current = onQuit; }, [onQuit]);
@@ -292,6 +292,15 @@ function DinoGame({ onQuit }: { onQuit: () => void }) {
     if (!canvas) return;
     const ctx = canvas.getContext('2d') as CanvasRenderingContext2D;
     if (!ctx) return;
+
+    // Theme-aware color palette
+    const C = isDark ? {
+      bg: '#0D1117', ground: '#30363D', dino: '#5BCC7E', eye: '#0D1117',
+      obstacle: '#58a6ff', score: '#FFD300', info: '#58a6ff', dead: '#FF6B6B',
+    } : {
+      bg: '#F3F4F6', ground: 'rgba(0,0,0,0.18)', dino: '#116329', eye: '#F3F4F6',
+      obstacle: '#0550ae', score: '#953800', info: '#0550ae', dead: '#d1242f',
+    };
 
     // Set canvas resolution to actual display width
     const W = canvas.parentElement?.offsetWidth ?? 800;
@@ -338,31 +347,31 @@ function DinoGame({ onQuit }: { onQuit: () => void }) {
       last = ts;
       g.frame++;
 
-      ctx.fillStyle = '#0D1117';
+      ctx.fillStyle = C.bg;
       ctx.fillRect(0, 0, W, H);
 
       // Ground
-      ctx.strokeStyle = '#30363D';
+      ctx.strokeStyle = C.ground;
       ctx.lineWidth = 1;
       ctx.beginPath(); ctx.moveTo(0, GROUND); ctx.lineTo(W, GROUND); ctx.stroke();
 
       // Score
-      ctx.fillStyle = '#FFD300';
+      ctx.fillStyle = C.score;
       ctx.font = '11px "JetBrains Mono", monospace';
       ctx.textAlign = 'right';
       ctx.fillText('SCORE ' + Math.floor(g.score), W - 14, 18);
 
       if (!g.started && !g.dead) {
-        ctx.fillStyle = '#58a6ff';
+        ctx.fillStyle = C.info;
         ctx.font = '13px "JetBrains Mono", monospace';
         ctx.textAlign = 'center';
         ctx.fillText('SPACE or click to start · ESC to exit', W / 2, H / 2 + 4);
       } else if (g.dead) {
-        ctx.fillStyle = '#FF6B6B';
+        ctx.fillStyle = C.dead;
         ctx.font = '14px "JetBrains Mono", monospace';
         ctx.textAlign = 'center';
         ctx.fillText('GAME OVER  —  Score: ' + Math.floor(g.score), W / 2, H / 2 - 8);
-        ctx.fillStyle = '#58a6ff';
+        ctx.fillStyle = C.info;
         ctx.font = '11px "JetBrains Mono", monospace';
         ctx.fillText('SPACE or click to restart', W / 2, H / 2 + 12);
       } else {
@@ -385,7 +394,6 @@ function DinoGame({ onQuit }: { onQuit: () => void }) {
         g.speed = 4 + g.score * 0.022;
 
         // Collision (with 3px forgiveness)
-        const dinoTop    = GROUND - DINO_H - g.dinoY;
         const dinoBottom = GROUND - g.dinoY;
         for (const o of g.obstacles) {
           if (DINO_X + DINO_W - 3 > o.x + 3 &&
@@ -395,18 +403,14 @@ function DinoGame({ onQuit }: { onQuit: () => void }) {
           }
         }
 
-        // Draw dino — green pixel-art blocks
+        // Draw dino — pixel-art blocks
         const dy = GROUND - DINO_H - g.dinoY;
-        ctx.fillStyle = '#5BCC7E';
-        // body
-        ctx.fillRect(DINO_X, dy, DINO_W, DINO_H - 8);
-        // head (wider)
-        ctx.fillRect(DINO_X - 2, dy - 10, DINO_W + 4, 12);
-        // eye
-        ctx.fillStyle = '#0D1117';
-        ctx.fillRect(DINO_X + DINO_W - 3, dy - 8, 4, 4);
-        // legs (alternating)
-        ctx.fillStyle = '#5BCC7E';
+        ctx.fillStyle = C.dino;
+        ctx.fillRect(DINO_X, dy, DINO_W, DINO_H - 8);          // body
+        ctx.fillRect(DINO_X - 2, dy - 10, DINO_W + 4, 12);     // head
+        ctx.fillStyle = C.eye;
+        ctx.fillRect(DINO_X + DINO_W - 3, dy - 8, 4, 4);       // eye
+        ctx.fillStyle = C.dino;
         const lp = Math.floor(g.score * 0.8) % 2;
         if (!g.jumping) {
           ctx.fillRect(DINO_X + 2, GROUND - 8, 5, 8);
@@ -416,11 +420,10 @@ function DinoGame({ onQuit }: { onQuit: () => void }) {
           ctx.fillRect(DINO_X + 10, GROUND - DINO_H - g.dinoY + DINO_H - 4, 5, 4);
         }
 
-        // Draw obstacles — cyan cacti
-        ctx.fillStyle = '#58a6ff';
+        // Draw obstacles
+        ctx.fillStyle = C.obstacle;
         for (const o of g.obstacles) {
           ctx.fillRect(o.x, GROUND - o.h, o.w, o.h);
-          // cactus arms
           ctx.fillRect(o.x - 5, GROUND - o.h + 8, 5, 4);
           ctx.fillRect(o.x + o.w, GROUND - o.h + 14, 5, 4);
         }
@@ -435,7 +438,7 @@ function DinoGame({ onQuit }: { onQuit: () => void }) {
       window.removeEventListener('keydown', onKey);
       canvas.removeEventListener('click', doJump);
     };
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [isDark]); // re-init canvas when theme changes
 
   return (
     <div className="border-t border-[var(--terminal-border)]">
@@ -678,10 +681,16 @@ export default function Skills() {
     return () => clearInterval(id);
   }, []);
 
-  // Scroll entrance — spring rise matching site style
-  const { scrollYProgress } = useScroll({ target: sectionRef, offset: ['start end', 'start 0.3'] });
-  const sectionY       = useTransform(scrollYProgress, [0, 1], [80, 0]);
-  const sectionOpacity = useTransform(scrollYProgress, [0, 0.45], [0, 1]);
+  // Scroll entrance — spring rise
+  const { scrollYProgress: enterProgress } = useScroll({ target: sectionRef, offset: ['start end', 'start 0.3'] });
+  const sectionY       = useTransform(enterProgress, [0, 1], [80, 0]);
+  const sectionOpacity = useTransform(enterProgress, [0, 0.45], [0, 1]);
+
+  // Scroll exit — terminal zooms in and fades (mirrors Hero dashboard)
+  const { scrollYProgress: exitProgress } = useScroll({ target: sectionRef, offset: ['start start', 'end start'] });
+  const exitScale   = useTransform(exitProgress, [0.42, 1], [1, 1.18]);
+  const exitOpacity = useTransform(exitProgress, [0.48, 0.88], [1, 0]);
+  const exitY       = useTransform(exitProgress, [0.42, 1], [0, -52]);
 
   // Auto-scroll to bottom
   useEffect(() => {
@@ -713,8 +722,6 @@ export default function Skills() {
             ...treeLines.filter((l): l is Line => !!l),
           ]);
           setInputEnabled(true);
-          const ft = setTimeout(() => inputRef.current?.focus(), 100);
-          timers.push(ft);
         }, 400);
         timers.push(t);
         return;
@@ -1253,9 +1260,15 @@ export default function Skills() {
 
   return (
     <section ref={sectionRef} id="skills" className="relative py-24 md:py-32">
+      {/* Deep background glow */}
       <div
-        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[400px] opacity-[0.04] blur-3xl pointer-events-none"
+        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[400px] opacity-[0.06] blur-3xl pointer-events-none"
         style={{ background: 'radial-gradient(ellipse, var(--color-cyan) 0%, transparent 70%)' }}
+      />
+      {/* Elevated terminal highlight — mimics Hero dashboard treatment */}
+      <div
+        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[900px] h-[700px] opacity-[0.12] blur-[80px] pointer-events-none"
+        style={{ background: 'radial-gradient(ellipse 60% 50% at 50% 50%, rgba(88,166,255,0.5) 0%, transparent 100%)' }}
       />
 
       <div className="max-w-7xl mx-auto px-6">
@@ -1265,10 +1278,17 @@ export default function Skills() {
         />
 
         <motion.div style={{ y: sectionY, opacity: sectionOpacity }}>
-          {/* Terminal window */}
+          {/* Exit animation — zooms in and fades as section scrolls out (mirrors Hero dashboard) */}
+          <motion.div style={{ scale: exitScale, opacity: exitOpacity, y: exitY, willChange: 'transform, opacity' }}>
+          {/* Terminal window — elevated with backdrop blur + glow highlight */}
           <div
-            className="rounded-2xl border border-[var(--border-color)] overflow-hidden shadow-[0_0_80px_rgba(88,166,255,0.05)]"
-            style={{ background: 'var(--terminal-bg)' }}
+            className="rounded-2xl border border-[var(--border-color)] overflow-hidden"
+            style={{
+              background: 'var(--terminal-bg)',
+              boxShadow: '0 0 0 1px rgba(88,166,255,0.08) inset, 0 24px 80px rgba(0,0,0,0.45), 0 0 60px rgba(88,166,255,0.07)',
+              backdropFilter: 'blur(2px)',
+              WebkitBackdropFilter: 'blur(2px)',
+            }}
             onClick={() => inputRef.current?.focus()}
           >
             {/* Title bar */}
@@ -1355,7 +1375,7 @@ export default function Skills() {
 
             {/* Dino game */}
             {showGame && (
-              <DinoGame onQuit={() => {
+              <DinoGame isDark={theme === 'dark'} onQuit={() => {
                 setShowGame(false);
                 setTimeout(() => inputRef.current?.focus(), 50);
               }} />
@@ -1382,6 +1402,7 @@ export default function Skills() {
               </button>
             ))}
           </div>
+          </motion.div>{/* /exit animation */}
         </motion.div>
       </div>
     </section>
