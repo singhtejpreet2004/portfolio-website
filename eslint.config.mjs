@@ -13,6 +13,16 @@ const eslintConfig = defineConfig([
     "build/**",
     "next-env.d.ts",
   ]),
+  {
+    rules: {
+      // React Compiler rules added in eslint-plugin-react-hooks v6.
+      // These flag valid patterns: setState in useEffect for client-only init,
+      // Math.random() in event handlers, and ref.current mutation.
+      'react-hooks/set-state-in-effect': 'off',
+      'react-hooks/purity': 'off',
+      'react-hooks/immutability': 'off',
+    },
+  },
 ]);
 
 export default eslintConfig;
