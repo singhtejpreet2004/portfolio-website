@@ -7,7 +7,6 @@ import {
   Linkedin,
   Mail,
   Globe,
-  Download,
   ArrowRight,
   CheckCircle2,
   X,
@@ -97,7 +96,7 @@ function ThankYouPopup({ onClose }: { onClose: () => void }) {
           animate={{ opacity: 0.7 }}
           transition={{ delay: 0.35 }}
         >
-          200 OK · Message Delivered
+          OK · Message Delivered
         </motion.p>
       </motion.div>
     </motion.div>
@@ -109,18 +108,27 @@ function ThankYouPopup({ onClose }: { onClose: () => void }) {
 // ─────────────────────────────────────────────────────────
 
 export default function Contact() {
-  const [formState, setFormState] = useState<'idle' | 'sending'>('idle');
+  const [formState, setFormState] = useState<'idle' | 'sending' | 'error'>('idle');
   const [showThankYou, setShowThankYou] = useState(false);
   const [formData, setFormData] = useState({ name: '', email: '', subject: '', message: '' });
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setFormState('sending');
-    setTimeout(() => {
+    try {
+      const res = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
+      if (!res.ok) throw new Error('send failed');
       setFormState('idle');
       setShowThankYou(true);
       setFormData({ name: '', email: '', subject: '', message: '' });
-    }, 1400);
+    } catch {
+      setFormState('error');
+      setTimeout(() => setFormState('idle'), 3000);
+    }
   };
 
   return (
@@ -237,7 +245,9 @@ export default function Contact() {
                     className="mt-6 w-full flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-[var(--color-yellow)] to-[#FFA500] text-[var(--color-text-dark)] font-semibold text-sm hover:shadow-[var(--shadow-glow-yellow)] transition-all disabled:opacity-60 disabled:cursor-not-allowed"
                   >
                     {formState === 'idle' ? (
-                      <span className="font-[family-name:var(--font-jetbrains)]">{`>>> Send Request`}</span>
+                      <span className="font-[family-name:var(--font-jetbrains)]">Send Request</span>
+                    ) : formState === 'error' ? (
+                      <span className="font-[family-name:var(--font-jetbrains)]">Failed — try again</span>
                     ) : (
                       <span className="font-[family-name:var(--font-jetbrains)]">Sending...</span>
                     )}
@@ -301,7 +311,6 @@ export default function Contact() {
                 whileTap={{ scale: 0.98 }}
                 className="flex items-center justify-center gap-2 w-full p-4 rounded-xl bg-gradient-to-r from-[var(--color-yellow)] to-[#FFA500] text-[var(--color-text-dark)] font-semibold hover:shadow-[var(--shadow-glow-yellow)] transition-all"
               >
-                <Download size={18} />
                 Download Resume
               </motion.a>
 

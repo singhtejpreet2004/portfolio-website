@@ -78,23 +78,23 @@ function BentoCard({
         transition={{ duration: 0.22 }}
       />
 
-      <div className={`relative z-10 h-full flex flex-col ${isLarge ? 'p-7 md:flex-row md:gap-6 md:items-start' : isMedium ? 'p-6' : 'p-5'}`}>
+      <div className={`relative z-10 h-full flex flex-col ${isLarge ? 'p-5 md:flex-row md:gap-4 md:items-start' : isMedium ? 'p-4' : 'p-3'}`}>
         {/* Icon */}
         <div
-          className={`flex-shrink-0 rounded-xl flex items-center justify-center mb-4 ${
-            isLarge ? 'w-12 h-12 md:mb-0' : isMedium ? 'w-11 h-11' : 'w-9 h-9'
+          className={`flex-shrink-0 rounded-xl flex items-center justify-center mb-3 ${
+            isLarge ? 'w-10 h-10 md:mb-0' : isMedium ? 'w-9 h-9' : 'w-8 h-8'
           }`}
           style={{ backgroundColor: `${achievement.badgeColor}18` }}
         >
           {achievement.type === 'accomplishment'
-            ? <FileText size={isLarge ? 22 : isMedium ? 20 : 17} style={{ color: achievement.badgeColor }} />
-            : <Icon    size={isLarge ? 22 : isMedium ? 20 : 17} style={{ color: achievement.badgeColor }} />
+            ? <FileText size={isLarge ? 18 : isMedium ? 16 : 14} style={{ color: achievement.badgeColor }} />
+            : <Icon    size={isLarge ? 18 : isMedium ? 16 : 14} style={{ color: achievement.badgeColor }} />
           }
         </div>
 
         <div className="flex-1 min-w-0">
           {/* Type + date */}
-          <div className="flex items-center justify-between gap-2 mb-2">
+          <div className="flex items-center justify-between gap-2 mb-1.5">
             <span
               className="text-[10px] uppercase tracking-widest font-semibold"
               style={{ color: achievement.badgeColor, opacity: 0.75 }}
@@ -109,26 +109,26 @@ function BentoCard({
           {/* Title */}
           <h4
             className={`font-[family-name:var(--font-display)] font-bold text-[var(--text-primary)] leading-snug group-hover:text-[var(--color-yellow)] transition-colors ${
-              isLarge ? 'text-xl mb-2' : isMedium ? 'text-base mb-1.5' : 'text-sm mb-1'
+              isLarge ? 'text-base mb-1.5' : isMedium ? 'text-sm mb-1' : 'text-xs mb-1'
             }`}
           >
             {achievement.title}
           </h4>
 
           {/* Issuer */}
-          <p className="text-xs text-[var(--text-secondary)] mb-2 opacity-70">
+          <p className="text-[11px] text-[var(--text-secondary)] mb-1.5 opacity-70">
             {achievement.issuer}
           </p>
 
           {/* Description — md and lg */}
           {(isMedium || isLarge) && (
-            <p className={`text-sm text-[var(--text-secondary)] leading-relaxed ${isLarge ? '' : 'line-clamp-2'}`}>
+            <p className={`text-xs text-[var(--text-secondary)] leading-relaxed ${isLarge ? '' : 'line-clamp-2'}`}>
               {achievement.description}
             </p>
           )}
 
           {/* Shimmer bar */}
-          <div className="mt-4 h-0.5 rounded-full overflow-hidden" style={{ background: 'var(--bg-hover)' }}>
+          <div className="mt-3 h-0.5 rounded-full overflow-hidden" style={{ background: 'var(--bg-hover)' }}>
             <motion.div
               className="h-full rounded-full"
               style={{ background: `linear-gradient(90deg, transparent, ${achievement.badgeColor}, transparent)` }}
@@ -171,7 +171,7 @@ export default function Achievements() {
       />
 
       <motion.div
-        className="max-w-7xl mx-auto px-6"
+        className="max-w-5xl mx-auto px-6"
         style={{ scale, willChange: 'transform', transformOrigin: 'top center' }}
       >
         <SectionHeading
@@ -181,7 +181,7 @@ export default function Achievements() {
 
         {/* Bento grid */}
         <motion.div
-          className="grid gap-4 mt-12"
+          className="grid gap-3 mt-10"
           style={{ gridTemplateColumns: 'repeat(3, 1fr)' }}
           initial={{ opacity: 0, y: 32 }}
           whileInView={{ opacity: 1, y: 0 }}

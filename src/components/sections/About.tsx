@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef } from 'react';
-import { motion, useScroll, useTransform } from 'framer-motion';
+import { motion, useScroll, useTransform, useSpring } from 'framer-motion';
 import { Radio, GitBranch, FolderGit2, Trophy, Code2, FileText, Award } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import AnimatedCounter from '@/components/ui/AnimatedCounter';
@@ -161,7 +161,8 @@ export default function About() {
     target: sectionRef,
     offset: ['start end', 'start 0.25'],
   });
-  const sectionSlideX = useTransform(scrollYProgress, [0, 1], [120, 0]);
+  const rawSlideX     = useTransform(scrollYProgress, [0, 1], [120, 0]);
+  const sectionSlideX = useSpring(rawSlideX, { stiffness: 55, damping: 18, mass: 1 });
 
   // Mouse parallax depth layers
   const { springX, springY } = useMouseContext();

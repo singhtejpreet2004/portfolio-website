@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect, type ReactNode } from 'react';
-import { motion, useScroll, useTransform } from 'framer-motion';
+import { motion, useScroll, useTransform, useSpring } from 'framer-motion';
 import SectionHeading from '@/components/ui/SectionHeading';
 import { skillCategories, miscellaneousSkills } from '@/data/skills';
 import { useTheme } from '@/components/providers/ThemeProvider';
@@ -52,7 +52,7 @@ function jskillRow(skill: (typeof ALL)[0]): ReactNode {
       <span className="text-[var(--terminal-muted)]">{pad(skill.catName, 22)}</span>
       <span style={{ color: skill.color }}>{bar(skill.proficiency)}</span>
       <span className="text-[var(--terminal-text)]">{' ' + skill.proficiency + '%'}</span>
-      <span className="text-[var(--terminal-muted)] opacity-60">{' · ' + skill.yearsOfExperience + 'yr'}</span>
+      <span className="text-[var(--terminal-muted)]">{' · ' + skill.yearsOfExperience + 'yr'}</span>
     </div>
   );
 }
@@ -63,7 +63,7 @@ function jcatTree(chars: string, cat: (typeof skillCategories)[0]): ReactNode {
     <div className="whitespace-pre text-sm leading-relaxed flex items-baseline">
       <span className="text-[var(--terminal-muted)]">{chars}</span>
       <span style={{ color }} className="font-semibold">{pad(catSlug(cat.name) + '/', 28)}</span>
-      <span className="text-[var(--terminal-muted)] opacity-50">{'[avg: ' + catAvg(cat.name) + '%  · ' + cat.skills.length + ' files]'}</span>
+      <span className="text-[var(--terminal-muted)] opacity-75">{'[avg: ' + catAvg(cat.name) + '%  · ' + cat.skills.length + ' files]'}</span>
     </div>
   );
 }
@@ -76,8 +76,8 @@ function jskillTree(chars: string, skill: (typeof ALL)[0]): ReactNode {
       <span style={{ color: skill.color }}>{pad(s, 26)}</span>
       <span className="text-[var(--terminal-muted)]">{'.skill  '}</span>
       <span style={{ color: skill.color }}>{bar(skill.proficiency)}</span>
-      <span className="text-[var(--terminal-muted)]">{' ' + skill.proficiency + '%'}</span>
-      <span className="text-[var(--terminal-muted)] opacity-50">{' · ' + skill.yearsOfExperience + 'yr'}</span>
+      <span className="text-[var(--terminal-text)]">{' ' + skill.proficiency + '%'}</span>
+      <span className="text-[var(--terminal-muted)]">{' · ' + skill.yearsOfExperience + 'yr'}</span>
     </div>
   );
 }
@@ -498,7 +498,7 @@ function HtopView({ onQuit }: { onQuit: () => void }) {
     return (
       <>
         <span style={{ color }}>{'█'.repeat(f)}</span>
-        <span style={{ color: 'var(--terminal-muted)', opacity: 0.3 }}>{'░'.repeat(w - f)}</span>
+        <span style={{ color: 'var(--terminal-muted)', opacity: 0.55 }}>{'░'.repeat(w - f)}</span>
       </>
     );
   }
@@ -683,14 +683,17 @@ export default function Skills() {
 
   // Scroll entrance — spring rise
   const { scrollYProgress: enterProgress } = useScroll({ target: sectionRef, offset: ['start end', 'start 0.3'] });
-  const sectionY       = useTransform(enterProgress, [0, 1], [80, 0]);
-  const sectionOpacity = useTransform(enterProgress, [0, 0.45], [0, 1]);
+  const rawY    = useTransform(enterProgress, [0, 1], [80, 0]);
+  const sectionY = useSpring(rawY, { stiffness: 55, damping: 18, mass: 1 });
 
   // Scroll exit — terminal zooms in and fades (mirrors Hero dashboard)
   const { scrollYProgress: exitProgress } = useScroll({ target: sectionRef, offset: ['start start', 'end start'] });
-  const exitScale   = useTransform(exitProgress, [0.42, 1], [1, 1.18]);
-  const exitOpacity = useTransform(exitProgress, [0.48, 0.88], [1, 0]);
-  const exitY       = useTransform(exitProgress, [0.42, 1], [0, -52]);
+  const rawExitScale   = useTransform(exitProgress, [0.42, 1], [1, 1.18]);
+  const rawExitOpacity = useTransform(exitProgress, [0.48, 0.88], [1, 0]);
+  const rawExitY       = useTransform(exitProgress, [0.42, 1], [0, -52]);
+  const exitScale   = useSpring(rawExitScale,   { stiffness: 80, damping: 20 });
+  const exitOpacity = useSpring(rawExitOpacity, { stiffness: 80, damping: 20 });
+  const exitY       = useSpring(rawExitY,       { stiffness: 80, damping: 20 });
 
   // Auto-scroll to bottom
   useEffect(() => {
@@ -1277,7 +1280,13 @@ export default function Skills() {
           title="Skills"
         />
 
-        <motion.div style={{ y: sectionY, opacity: sectionOpacity }}>
+        <motion.div
+          style={{ y: sectionY }}
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true, margin: '-120px' }}
+          transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+        >
           {/* Exit animation — zooms in and fades as section scrolls out (mirrors Hero dashboard) */}
           <motion.div style={{ scale: exitScale, opacity: exitOpacity, y: exitY, willChange: 'transform, opacity' }}>
           {/* Terminal window — elevated with backdrop blur + glow highlight */}

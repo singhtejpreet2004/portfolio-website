@@ -55,12 +55,12 @@
   --code-fn: var(--color-yellow);
   --code-string: var(--color-green);
   /* Terminal — dark theme defaults */
-  --terminal-bg: #0D1117;
-  --terminal-titlebar: #161B22;
-  --terminal-border: rgba(48, 54, 61, 0.9);
-  --terminal-text: #c9d1d9;
-  --terminal-muted: #8b949e;
-  --terminal-scrollbar: #30363D;
+  --terminal-bg: #0A1120;
+  --terminal-titlebar: #0F1A2E;
+  --terminal-border: rgba(88, 166, 255, 0.25);
+  --terminal-text: #E8F0FF;
+  --terminal-muted: #B0CCEE;
+  --terminal-scrollbar: #1E2D45;
 }
 
 [data-theme="light"] {

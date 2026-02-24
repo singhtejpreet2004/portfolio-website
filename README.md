@@ -1,162 +1,239 @@
-# Tejpreet Singh — Portfolio Website
+# Tejpreet Singh — Data Engineer Portfolio
 
-Personal portfolio for Tejpreet Singh, Data Engineer. Built to feel like a living data pipeline — interactive, terminal-flavored, and performance-focused.
+![Preview](public/images/preview.png)
+
+![Next.js](https://img.shields.io/badge/Next.js-16-black?style=flat-square&logo=next.js)
+![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?style=flat-square&logo=typescript&logoColor=white)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-v4-06B6D4?style=flat-square&logo=tailwindcss&logoColor=white)
+![Framer Motion](https://img.shields.io/badge/Framer_Motion-12-EF0082?style=flat-square&logo=framer&logoColor=white)
+![Vercel](https://img.shields.io/badge/Deployed_on-Vercel-000000?style=flat-square&logo=vercel)
+![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)
+
+A fully custom, dark-mode portfolio for a data engineer — built with Next.js 16, Framer Motion physics, and a developer-aesthetic design system. Features interactive easter eggs, a real-time contact + hire pipeline, smooth scroll, and a canvas-rendered dot grid.
+
+---
+
+## Live Demo
+
+[singhtejpreet.com](https://singhtejpreet.com)
 
 ---
 
 ## Tech Stack
 
-| Layer | Choice |
+| Layer | Technology |
 |---|---|
 | Framework | Next.js 16 (App Router, Turbopack) |
-| Language | TypeScript |
+| Language | TypeScript 5 |
 | Styling | Tailwind CSS v4 |
-| Animation | Framer Motion |
-| Fonts | Inter · JetBrains Mono · Space Grotesk |
+| Animation | Framer Motion 12, GSAP 3 |
+| Smooth Scroll | Lenis 1.3 |
+| Email (API) | Nodemailer + Gmail SMTP |
+| Fonts | Inter, JetBrains Mono, Space Grotesk |
+| Deployment | Vercel |
+
+---
+
+## Features
+
+### Sections
+
+| Section | Description |
+|---|---|
+| **Hero** | Canvas dot-grid with gravitational lens, floating badges, interactive data dashboard |
+| **About** | Bio, animated stat counters, social links |
+| **Skills** | Skills by category with proficiency indicators |
+| **Experience** | Timeline of work experience with tech stack chips |
+| **Projects** | Featured project showcase with metrics |
+| **Education** | Horizontal-scroll carousel with institution cards |
+| **Achievements** | Bento grid of certifications, awards, and accomplishments |
+| **Contact** | Rate-limited contact form with email delivery |
+
+### UI & UX
+
+- **Custom cursor** — magnetic dot that follows pointer
+- **Loading screen** — session-once animated intro with typewriter terminal lines
+- **Global context menu** — right-click anywhere for custom actions including hire flow
+- **Smooth scroll** — Lenis-powered with Framer Motion sync
+- **Theme toggle** — dark/light with circular clip-path reveal animation
+- **Pipeline Spine** — animated git-branch visualization in the left sidebar
+- **Hire popup** — multi-step form: application → resume download → confirmation
+
+### API
+
+- `POST /api/contact` — contact form with rate limiting, sanitization, and Gmail delivery
+- `POST /api/hire` — hire inquiry with the same security pipeline
+
+---
+
+## Easter Eggs
+
+There are **9 hidden interactions** in the hero section:
+
+1. **Konami Code** — `↑ ↑ ↓ ↓ ← → ← → B A`
+2. **Mouse Shake** — shake the mouse rapidly (7+ direction changes in 250ms)
+3. **Triple Click** — triple-click the hero
+4. **Long Press** — hold click for 2+ seconds
+5. **Scroll Bomb** — scroll very fast
+6. **Cursor Trail** — move mouse slowly for a while
+7. **Name Click** — click "Tejpreet" in the title
+8. **Dashboard Double Click** — double-click the data dashboard card
+9. **Badge Hover** — hover all 4 floating badges consecutively
 
 ---
 
 ## Project Structure
 
 ```
-src/
-├── app/
-│   ├── layout.tsx          # Root layout — fonts, ThemeProvider, LoadingScreen
-│   ├── page.tsx            # Page composition
-│   └── globals.css         # Design tokens (CSS custom properties)
-│
-├── components/
-│   ├── layout/
-│   │   ├── Navigation.tsx  # Top nav bar
-│   │   └── PipelineSpine.tsx  # Fixed left-side git-graph spine
-│   │
-│   ├── sections/
-│   │   └── Hero.tsx        # Hero section (primary canvas — see below)
-│   │
-│   ├── providers/
-│   │   └── ThemeProvider.tsx
-│   │
-│   └── ui/
-│       └── LoadingScreen.tsx  # Terminal boot animation on every page load
-```
-
----
-
-## Hero Section — Feature Reference
-
-`src/components/sections/Hero.tsx` is the main piece. Everything below lives in that one file.
-
-### Interactive Dot Grid (`InteractiveDotGrid`)
-- HTML Canvas, `requestAnimationFrame` draw loop
-- Dots respond to mouse proximity — glow and connect with lines
-- Canvas dimensions cached in refs (no per-frame DOM reads)
-- Draw loop pauses via `visibilitychange` API when tab is hidden
-- `willChange: transform` for GPU compositing
-
-### Matrix Rain (`MatrixRain`)
-- Classic character rain using `--color-cyan` palette
-- **Trigger:** vigorous horizontal mouse shake — dx > 50px within 250ms window, 7+ directional changes
-- Auto-dismisses after ~4 seconds
-
-### Right-Click Context Menu (`ContextMenu`)
-10 terminal-style items across 4 groups:
-- `inspect pipeline`, `{} view source`, `⚡ run diagnostics`, `~ trace --path`
-- `! force deploy`, `? whoami tejpreet`, `ls ~/skills`
-- `→ view resume` — opens `/resume.pdf`
-- `♥ hire tejpreet` — opens hire form
-- `★ sudo hire tejpreet` — same hire form (alias)
-
-Each item (except direct links) shows a `processing...` toast for 900ms before delivering a randomized response. Messages never repeat back-to-back per category (`lastMenuMsg` ref).
-
-### Hire Popup — 3-Step State Machine (`HirePopup` + `HireModalShell`)
-Triggered from context menu. Three sequential modals:
-1. **`hire.sh`** — form: Name, Company, Email (required), Phone (optional). Validated before advance.
-2. **`access_granted.sh`** — resume download CTA.
-3. **`thank_you.sh`** — confirmation with name interpolation.
-
-`HireModalShell` is defined at module level (not inside `HirePopup`) to prevent React remounting on every keystroke.
-
-### Stacked Dashboard Cards (`DataDashboard`)
-Two cards in a card stack, swappable:
-- **Front:** `PipelineDashboardCard` — live throughput chart, Kafka/Spark/Delta pipeline rows, terminal output, action buttons.
-- **Back:** `VideoPipelineDashboard` — FPS counter, frame buffer bar chart (yellow palette), video pipeline rows, video terminal output.
-
-Top-right corner (100×80px hit area) — hover to peek, click to spring-swap cards. Back card renders at `opacity: 0.65`, rotated -2.5°, offset 24px right / 18px up.
-
-### Floating Squircles (`FloatingSquircle`)
-4 metric badges floating around the dashboard, `z-[30]` so they always sit above both stacked cards. Click to jitter + flash red. Positions are asymmetric (not midpoints).
-
-### Easter Egg Guide
-Hidden panel accessible from the hero — lists all discoverable interactions:
-- Mouse shake → Matrix Rain
-- Right-click anywhere → Context menu
-- Dashboard corner → Card swap
-- `sudo hire tejpreet` → Hire flow
-- Squircle clicks
-- Keyboard shortcut (`?`)
-
----
-
-## PipelineSpine — Scroll-Fill Progress
-
-`src/components/layout/PipelineSpine.tsx`
-
-Fixed left column visible on `xl` breakpoints. Mimics a git graph:
-- **Main branch line** — faint background stroke
-- **Progress fill** — `stroke="url(#spineGrad)"` with `gradientUnits="userSpaceOnUse"`, coordinates pinned to `y1=0 y2=vh` so the gradient (cyan → purple → yellow) maps to the full page height. The line clips at `scrollProgress * vh`, giving a genuine color-fill-on-scroll effect.
-- **Branch nodes** — fork/merge curves per section, active node glows and animates a data particle
-- **Leading particle** — bright cyan dot tracks scroll position with pulse animation
-- **Glow filter** — `feGaussianBlur` + `feMerge` SVG filter on the fill line
-
-> **Note on gradient units:** SVG `linearGradient` with default `gradientUnits="objectBoundingBox"` on a perfectly vertical `<line>` (x1 === x2) collapses to a zero-width bounding box and the gradient doesn't render. Must use `gradientUnits="userSpaceOnUse"` with absolute pixel coordinates.
-
----
-
-## Loading Screen
-
-`src/components/ui/LoadingScreen.tsx`
-
-Plays on every page load (no sessionStorage skip):
-- `fixed inset-0 z-[9999]` dark navy overlay
-- Terminal window with 4 typewriter lines at 600ms intervals
-- Animated progress bar filling to 100% over 2.6s
-- Fades out with `exit={{ opacity: 0, y: -16 }}`
-- Static CSS dot grid background (no canvas overhead)
-
----
-
-## Design Tokens (`globals.css`)
-
-Key custom properties:
-
-```css
---color-cyan:   #58a6ff;   /* GitHub dark-theme accent blue */
---color-purple: #a371f7;
---color-yellow: #ffd700;
---color-green:  #5bcc7e;
-
---bg-primary:   var(--color-navy-deep);    /* #0D1117 */
---bg-secondary: var(--color-navy-medium);  /* #1A2142 */
---border-color: rgba(255,255,255,0.08);
-
---shadow-glow-cyan: 0 0 20px rgba(88,166,255,0.3);
+portfolio-website/
+├── public/
+│   ├── fonts/                     # Self-hosted Satoshi font
+│   ├── images/                    # Avatar, preview screenshot
+│   └── resume.pdf                 # Downloadable resume
+├── src/
+│   ├── app/
+│   │   ├── api/
+│   │   │   ├── contact/route.ts   # Contact form endpoint
+│   │   │   └── hire/route.ts      # Hire form endpoint
+│   │   ├── globals.css            # Design system (CSS variables)
+│   │   ├── layout.tsx             # Root layout
+│   │   └── page.tsx               # Home page
+│   ├── components/
+│   │   ├── layout/                # Navigation, Footer, PipelineSpine
+│   │   ├── providers/             # LenisProvider, ThemeProvider
+│   │   ├── sections/              # Hero, About, Skills, Experience, ...
+│   │   └── ui/                    # CustomCursor, LoadingScreen, ...
+│   ├── contexts/                  # MouseContext (spring mouse position)
+│   ├── data/                      # Static data (profile, skills, projects, ...)
+│   ├── hooks/                     # useMouseParallax
+│   ├── lib/                       # api-utils (server), utils (client)
+│   └── types/                     # TypeScript interfaces
+├── .env.example                   # Environment variable template
+├── next.config.ts
+└── tsconfig.json
 ```
 
 ---
 
 ## Getting Started
 
+### Prerequisites
+
+- **Node.js** >= 18
+- **npm** >= 9
+- A **Gmail account** with an [App Password](https://support.google.com/accounts/answer/185833) for the contact form
+
+### Installation
+
 ```bash
+git clone https://github.com/tejpreetsingh/portfolio-website.git
+cd portfolio-website
 npm install
-npm run dev
-# → http://localhost:3000
 ```
+
+### Environment Variables
+
+Copy the example file and fill in your values:
+
+```bash
+cp .env.example .env.local
+```
+
+| Variable | Required | Description |
+|---|---|---|
+| `GMAIL_USER` | Yes | Gmail address that sends contact/hire emails |
+| `GMAIL_APP_PASSWORD` | Yes | Gmail App Password (not your account password) |
+| `SITE_URL` | Yes | Production URL, no trailing slash (e.g. `https://yoursite.com`) |
+
+> Gmail App Passwords require 2FA enabled on your Google account. See the [Google guide](https://support.google.com/accounts/answer/185833).
+
+### Run Dev Server
+
+```bash
+npm run dev
+```
+
+Open [http://localhost:3000](http://localhost:3000).
 
 ---
 
-## Branch Strategy
+## Available Scripts
 
+| Script | Description |
+|---|---|
+| `npm run dev` | Start dev server with Turbopack |
+| `npm run build` | Build for production |
+| `npm start` | Start production server |
+| `npm run lint` | Run ESLint |
+
+---
+
+## Deployment
+
+### Vercel (Recommended)
+
+1. Import the repository in the [Vercel dashboard](https://vercel.com/new)
+2. Add the three environment variables under **Settings → Environment Variables**:
+   - `GMAIL_USER`
+   - `GMAIL_APP_PASSWORD`
+   - `SITE_URL` (set to your Vercel domain or custom domain)
+3. Deploy — Vercel auto-detects Next.js and configures the build
+
+### Other Platforms
+
+Any platform that supports Next.js 16 (Railway, Render, AWS Amplify, self-hosted Node). Ensure the three env vars are set before running `npm run build`.
+
+---
+
+## Architecture Notes
+
+### Design System
+
+All design tokens live in `src/app/globals.css` as CSS custom properties:
+
+```css
+--color-cyan:   #58a6ff;   /* GitHub dark-theme accent blue */
+--color-yellow: #FFD300;
+--color-green:  #5BCC7E;
+--color-purple: #3A10E5;
+--bg-primary:   #10162F;
+--bg-secondary: #1A2142;
+--border-color: rgba(255,255,255,0.08);
 ```
-main                    ← stable, production-ready
-└── hero-section-changes  ← merged: full hero + spine + loading screen
-```
+
+### Animation Philosophy
+
+- **Framer Motion** handles component entrance, hover, and spring physics
+- **GSAP** handles complex timeline-based sequences (loading screen)
+- **Lenis** provides smooth scroll; its scroll events sync with `useScroll` MotionValues
+- **Canvas animations** (dot grid) use `requestAnimationFrame` with a visibility pause to save CPU
+
+### Data Layer
+
+All content is colocated in `src/data/` as typed TypeScript modules. Updating the portfolio means editing these files — no CMS or database required.
+
+### API Security
+
+Both API routes share security utilities from `src/lib/api-utils.ts`:
+
+- In-memory rate limiter (5 req/IP/15 min)
+- HTML escape + input truncation before email rendering
+- Required env var guard — fails fast with a clear error if misconfigured
+
+---
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on opening issues, branching, and submitting pull requests.
+
+---
+
+## Security
+
+See [SECURITY.md](SECURITY.md) for the responsible disclosure policy.
+
+---
+
+## License
+
+[MIT](LICENSE) © 2026 Tejpreet Singh

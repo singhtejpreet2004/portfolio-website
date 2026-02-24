@@ -443,13 +443,19 @@ export default function GlobalContextMenu() {
             form={hireForm}
             errors={hireErrors}
             onFormChange={(field, val) => setHireForm((f) => ({ ...f, [field]: val }))}
-            onSubmitForm={() => {
+            onSubmitForm={async () => {
               const errs: Record<string, string> = {};
               if (!hireForm.name.trim()) errs.name = 'Required';
               if (!hireForm.company.trim()) errs.company = 'Required';
               if (!hireForm.email.trim() || !hireForm.email.includes('@')) errs.email = 'Valid email required';
               if (Object.keys(errs).length > 0) { setHireErrors(errs); return; }
               setHireStep('resume');
+              // Fire-and-forget email notification
+              fetch('/api/hire', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(hireForm),
+              }).catch(() => {/* silently ignore — UX not blocked */});
             }}
             onNext={() => setHireStep(hireStep === 'resume' ? 'thanks' : 'none')}
             onClose={() => setHireStep('none')}
